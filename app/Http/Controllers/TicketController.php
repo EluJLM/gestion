@@ -21,6 +21,13 @@ class TicketController extends Controller
                 ->latest()
                 ->get(),
             'statuses' => Ticket::statuses(),
+        ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Tickets/Create', [
+            'statuses' => Ticket::statuses(),
             'documentTypes' => ['CC', 'CE', 'NIT', 'PASAPORTE'],
         ]);
     }
