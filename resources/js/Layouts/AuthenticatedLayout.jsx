@@ -42,6 +42,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Crear ticket
                                 </NavLink>
+                                <NavLink
+                                    href={route('configuracion.edit')}
+                                    active={route().current('configuracion.*')}
+                                >
+                                    Configuración
+                                </NavLink>
                             </div>
                         </div>
 
@@ -157,6 +163,12 @@ export default function AuthenticatedLayout({ header, children }) {
                             active={route().current('tickets.create')}
                         >
                             Crear ticket
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('configuracion.edit')}
+                            active={route().current('configuracion.*')}
+                        >
+                            Configuración
                         </ResponsiveNavLink>
                     </div>
 

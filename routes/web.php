@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Foundation\Application;
@@ -30,6 +31,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/configuracion', [ConfiguracionController::class, 'edit'])->name('configuracion.edit');
+    Route::post('/configuracion/empresa', [ConfiguracionController::class, 'upsertCompany'])->name('configuracion.company.upsert');
+    Route::post('/configuracion/correo', [ConfiguracionController::class, 'upsertMail'])->name('configuracion.mail.upsert');
+    Route::post('/configuracion/correo/test', [ConfiguracionController::class, 'testMail'])->name('configuracion.mail.test');
 });
 
 require __DIR__.'/auth.php';
