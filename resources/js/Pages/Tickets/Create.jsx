@@ -4,6 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 const statusLabels = {
     pending: 'Pendiente',
@@ -12,7 +13,7 @@ const statusLabels = {
     closed: 'Cerrado',
 };
 
-export default function TicketsCreate({ statuses, documentTypes }) {
+export default function TicketsCreate({ statuses, documentTypes, previousClients }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         description: '',
@@ -29,6 +30,7 @@ export default function TicketsCreate({ statuses, documentTypes }) {
             address: '',
         },
     });
+    const [clientQuery, setClientQuery] = useState('');
 
     const submit = (e) => {
         e.preventDefault();
@@ -41,6 +43,47 @@ export default function TicketsCreate({ statuses, documentTypes }) {
         setData('client', {
             ...data.client,
             [field]: value,
+        });
+    };
+
+    const filteredClients = previousClients
+        .filter((client) => {
+            if (!clientQuery.trim()) {
+                return true;
+            }
+
+            const haystack = [
+                client.name,
+                client.email,
+                client.document_type,
+                client.document_number,
+                client.phone,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+            return haystack.includes(clientQuery.trim().toLowerCase());
+        })
+        .slice(0, 10);
+
+    const applyClient = (clientId) => {
+        const selectedClient = previousClients.find(
+            (client) => String(client.id) === String(clientId),
+        );
+
+        if (!selectedClient) {
+            return;
+        }
+
+        setData('client', {
+            ...data.client,
+            name: selectedClient.name ?? '',
+            email: selectedClient.email ?? '',
+            document_type: selectedClient.document_type ?? 'CC',
+            document_number: selectedClient.document_number ?? '',
+            phone: selectedClient.phone ?? '',
+            address: selectedClient.address ?? '',
         });
     };
 
@@ -172,6 +215,55 @@ export default function TicketsCreate({ statuses, documentTypes }) {
                         <h4 className="pt-2 text-md font-semibold text-gray-900">
                             Datos del cliente
                         </h4>
+
+                        <div className="rounded-md border border-gray-200 bg-gray-50 p-4">
+                            <h5 className="text-sm font-semibold text-gray-800">
+                                Buscar cliente anterior
+                            </h5>
+                            <p className="mt-1 text-sm text-gray-600">
+                                Escribe nombre, email o documento para reutilizar datos.
+                            </p>
+                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                                <div>
+                                    <InputLabel
+                                        htmlFor="client_search"
+                                        value="Buscar"
+                                    />
+                                    <TextInput
+                                        id="client_search"
+                                        className="mt-1 block w-full"
+                                        value={clientQuery}
+                                        onChange={(e) =>
+                                            setClientQuery(e.target.value)
+                                        }
+                                        placeholder="Ej: Ana, 123456, ana@correo.com"
+                                    />
+                                </div>
+                                <div>
+                                    <InputLabel
+                                        htmlFor="previous_client"
+                                        value="Clientes encontrados"
+                                    />
+                                    <select
+                                        id="previous_client"
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                        defaultValue=""
+                                        onChange={(e) => applyClient(e.target.value)}
+                                    >
+                                        <option value="" disabled>
+                                            Selecciona un cliente
+                                        </option>
+                                        {filteredClients.map((client) => (
+                                            <option key={client.id} value={client.id}>
+                                                {client.name} · {client.document_type}{' '}
+                                                {client.document_number} · {client.email}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="grid gap-4 md:grid-cols-2">
                             <div>
                                 <InputLabel htmlFor="client_name" value="Nombre" />

@@ -29,6 +29,18 @@ class TicketController extends Controller
         return Inertia::render('Tickets/Create', [
             'statuses' => Ticket::statuses(),
             'documentTypes' => ['CC', 'CE', 'NIT', 'PASAPORTE'],
+            'previousClients' => Client::query()
+                ->latest()
+                ->limit(100)
+                ->get([
+                    'id',
+                    'name',
+                    'email',
+                    'document_type',
+                    'document_number',
+                    'phone',
+                    'address',
+                ]),
         ]);
     }
 
