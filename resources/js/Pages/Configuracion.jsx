@@ -12,6 +12,10 @@ const smtpProviders = {
     zoho: { host: 'smtp.zoho.com', port: 587, encryption: 'tls' },
     sendgrid: { host: 'smtp.sendgrid.net', port: 587, encryption: 'tls' },
     mailgun: { host: 'smtp.mailgun.org', port: 587, encryption: 'tls' },
+    hostinger: { host: 'smtp.hostinger.com', port: 465, encryption: 'ssl' },
+    brevo: { host: 'smtp-relay.brevo.com', port: 587, encryption: 'tls' },
+    amazonSes: { host: 'email-smtp.us-east-1.amazonaws.com', port: 587, encryption: 'tls' },
+    protonMail: { host: 'smtp.protonmail.ch', port: 587, encryption: 'tls' },
 };
 
 export default function Configuracion({
@@ -313,6 +317,10 @@ export default function Configuracion({
                                     <option value="zoho">Zoho Mail</option>
                                     <option value="sendgrid">SendGrid</option>
                                     <option value="mailgun">Mailgun</option>
+                                    <option value="hostinger">Hostinger Email</option>
+                                    <option value="brevo">Brevo (Sendinblue)</option>
+                                    <option value="amazonSes">Amazon SES</option>
+                                    <option value="protonMail">Proton Mail</option>
                                 </select>
                             </div>
 
