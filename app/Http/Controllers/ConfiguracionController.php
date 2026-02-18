@@ -9,11 +9,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ConfiguracionController extends Controller
 {
+    private const DOCUMENT_TYPES = ['NIT', 'CC', 'CE', 'PASAPORTE'];
+
+    private const TAX_REGIMES = [
+        'Régimen Ordinario',
+        'Régimen Simple de Tributación (SIMPLE)',
+        'Gran Contribuyente',
+        'No responsable de IVA',
+        'Responsable de IVA',
+        'Autorretenedor',
+    ];
+
+    private const MAILERS = ['smtp', 'sendmail', 'log', 'array', 'failover'];
+
+    private const MAIL_ENCRYPTIONS = ['tls', 'ssl'];
+
+    private const MAIL_PORTS = [25, 465, 587, 2525];
+
     public function edit(): Response
     {
         return Inertia::render('Configuracion', [
@@ -29,6 +47,11 @@ class ConfiguracionController extends Controller
                     'mail_from_address',
                     'mail_from_name',
                 ]),
+            'documentTypes' => self::DOCUMENT_TYPES,
+            'taxRegimes' => self::TAX_REGIMES,
+            'mailers' => self::MAILERS,
+            'mailEncryptions' => self::MAIL_ENCRYPTIONS,
+            'mailPorts' => self::MAIL_PORTS,
         ]);
     }
 
@@ -37,7 +60,7 @@ class ConfiguracionController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'business_name' => ['required', 'string', 'max:255'],
-            'document_type' => ['required', 'string', 'max:50'],
+            'document_type' => ['required', Rule::in(self::DOCUMENT_TYPES)],
             'document_number' => ['required', 'string', 'max:100'],
             'address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:120'],
@@ -46,7 +69,7 @@ class ConfiguracionController extends Controller
             'phone' => ['required', 'string', 'max:50'],
             'whatsapp' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:255'],
-            'tax_regime' => ['required', 'string', 'max:255'],
+            'tax_regime' => ['required', Rule::in(self::TAX_REGIMES)],
             'logo_path' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -64,12 +87,12 @@ class ConfiguracionController extends Controller
     public function upsertMail(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'mail_mailer' => ['required', 'string', 'max:50'],
+            'mail_mailer' => ['required', Rule::in(self::MAILERS)],
             'mail_host' => ['required', 'string', 'max:255'],
-            'mail_port' => ['required', 'integer', 'min:1', 'max:65535'],
+            'mail_port' => ['required', Rule::in(self::MAIL_PORTS)],
             'mail_username' => ['required', 'string', 'max:255'],
             'mail_password' => ['nullable', 'string', 'max:255'],
-            'mail_encryption' => ['nullable', 'string', 'max:50'],
+            'mail_encryption' => ['nullable', Rule::in(self::MAIL_ENCRYPTIONS)],
             'mail_from_address' => ['required', 'email', 'max:255'],
             'mail_from_name' => ['required', 'string', 'max:255'],
         ]);
@@ -83,7 +106,7 @@ class ConfiguracionController extends Controller
         } else {
             return back()->withErrors([
                 'mail_password' => 'La contraseña SMTP es obligatoria en la primera configuración.',
-            ], 'mailSettings');
+            ]);
         }
 
         if ($mailSetting) {
@@ -106,7 +129,7 @@ class ConfiguracionController extends Controller
         if (! $mailSetting) {
             return back()->withErrors([
                 'test_email' => 'Primero debes guardar la configuración SMTP.',
-            ], 'mailTest');
+            ]);
         }
 
         Config::set('mail.default', $mailSetting->mail_mailer);
