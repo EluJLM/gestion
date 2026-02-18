@@ -132,20 +132,24 @@ class ConfiguracionController extends Controller
             ]);
         }
 
-        Config::set('mail.default', $mailSetting->mail_mailer);
-        Config::set('mail.mailers.smtp.host', $mailSetting->mail_host);
-        Config::set('mail.mailers.smtp.port', $mailSetting->mail_port);
-        Config::set('mail.mailers.smtp.username', $mailSetting->mail_username);
-        Config::set('mail.mailers.smtp.password', Crypt::decryptString($mailSetting->mail_password));
-        Config::set('mail.mailers.smtp.encryption', $mailSetting->mail_encryption ?: null);
-        Config::set('mail.from.address', $mailSetting->mail_from_address);
-        Config::set('mail.from.name', $mailSetting->mail_from_name);
+        $this->applyCompanyMailer($mailSetting);
 
-        Mail::raw('Este es un correo de prueba para verificar la configuración SMTP.', function ($message) use ($validated): void {
+        Mail::mailer('company_smtp')->raw('Este es un correo de prueba para verificar la configuración SMTP.', function ($message) use ($validated, $mailSetting): void {
             $message->to($validated['test_email'])
-                ->subject('Prueba SMTP - Gestión de tickets');
+                ->subject('Prueba SMTP - Gestión de tickets')
+                ->from($mailSetting->mail_from_address, $mailSetting->mail_from_name);
         });
 
         return back();
+    }
+
+    private function applyCompanyMailer(MailSetting $mailSetting): void
+    {
+        Config::set('mail.mailers.company_smtp.transport', $mailSetting->mail_mailer);
+        Config::set('mail.mailers.company_smtp.host', $mailSetting->mail_host);
+        Config::set('mail.mailers.company_smtp.port', $mailSetting->mail_port);
+        Config::set('mail.mailers.company_smtp.username', $mailSetting->mail_username);
+        Config::set('mail.mailers.company_smtp.password', Crypt::decryptString($mailSetting->mail_password));
+        Config::set('mail.mailers.company_smtp.encryption', $mailSetting->mail_encryption ?: null);
     }
 }
