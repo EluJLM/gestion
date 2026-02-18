@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\TicketCreatedMail;
+use App\Models\Client;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,9 +14,10 @@ class TicketManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_authenticated_user_can_create_ticket_with_client_data(): void
+    public function test_authenticated_user_can_create_ticket_with_existing_client(): void
     {
         $user = User::factory()->create();
+        $client = Client::factory()->create();
 
         Mail::fake();
 
@@ -26,29 +28,17 @@ class TicketManagementTest extends TestCase
             'observation' => 'Revisar cable de corriente',
             'estimated_price' => '120.50',
             'status' => Ticket::STATUS_PENDING,
-            'client' => [
-                'name' => 'Juan Pérez',
-                'email' => 'juan@example.com',
-                'document_type' => 'CC',
-                'document_number' => '100200300',
-                'phone' => '3001234567',
-                'address' => 'Calle 123 #45-67',
-            ],
+            'client_id' => $client->id,
         ]);
 
         $response->assertRedirect(route('tickets.index'));
-
-        $this->assertDatabaseHas('clients', [
-            'document_type' => 'CC',
-            'document_number' => '100200300',
-            'email' => 'juan@example.com',
-        ]);
 
         Mail::assertSent(TicketCreatedMail::class);
 
         $this->assertDatabaseHas('tickets', [
             'title' => 'No enciende impresora',
             'status' => Ticket::STATUS_PENDING,
+            'client_id' => $client->id,
         ]);
     }
 

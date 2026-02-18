@@ -22,12 +22,7 @@ class StoreTicketRequest extends FormRequest
             'observation' => ['nullable', 'string'],
             'estimated_price' => ['nullable', 'numeric', 'min:0'],
             'status' => ['required', Rule::in(Ticket::statuses())],
-            'client.name' => ['required', 'string', 'max:255'],
-            'client.email' => ['required', 'email', 'max:255'],
-            'client.document_type' => ['required', 'string', 'max:40'],
-            'client.document_number' => ['required', 'string', 'max:60'],
-            'client.phone' => ['required', 'string', 'max:50'],
-            'client.address' => ['required', 'string', 'max:255'],
+            'client_id' => ['required', 'integer', 'exists:clients,id'],
         ];
     }
 }
