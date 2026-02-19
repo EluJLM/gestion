@@ -58,3 +58,42 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 # gestion
+
+## Deploy rápido con Docker (Ubuntu)
+
+Este proyecto incluye `Dockerfile` + `docker-compose.yml` para un flujo de servidor simple:
+
+1. `git pull`
+2. `docker compose up -d --build` (si cambió Dockerfile)
+3. `docker compose restart app` (si solo cambió código)
+
+### Importante para tu caso (`.env` existente)
+
+- **No borres tu `.env`** en el servidor.
+- El contenedor `app` carga variables desde `env_file: .env`.
+- Si `APP_KEY` ya existe en `.env` (como en tu ejemplo), **no se regenera**.
+- Si no existe, se crea automáticamente al iniciar.
+
+En cada reinicio del contenedor `app`, el entrypoint ejecuta automáticamente:
+
+- `composer install`
+- `npm ci`
+- `npm run build`
+- `php artisan migrate --force` (con reintentos hasta que la DB responda)
+- `php artisan optimize:clear`
+- `php artisan config:cache`
+
+### Primer despliegue
+
+```bash
+docker compose up -d --build
+```
+
+La app quedará en `http://IP_DEL_SERVIDOR:8080`.
+
+### Actualización rápida
+
+```bash
+git pull
+docker compose restart app
+```
