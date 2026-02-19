@@ -58,3 +58,25 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 # gestion
+
+## Deploy con Docker (producción)
+
+1. Crea/actualiza tu archivo `.env` (puedes usar el del servidor que compartiste).
+2. Construye y levanta servicios:
+
+```bash
+docker compose up -d --build
+```
+
+3. La app quedará disponible por el puerto `8000`.
+
+Al iniciar el contenedor de `app`, se ejecuta automáticamente:
+- `php artisan key:generate --force` (solo si falta `APP_KEY`)
+- `php artisan optimize:clear`
+- `php artisan config:cache`
+- `php artisan route:cache`
+- `php artisan view:cache`
+- `php artisan event:cache`
+- `php artisan migrate --force --graceful`
+
+El `npm run build` se ejecuta durante el build de la imagen (etapa frontend del `Dockerfile`).
