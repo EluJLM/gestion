@@ -34,13 +34,13 @@ export default function AuthenticatedLayout({ header, children }) {
                                     href={route('tickets.index')}
                                     active={route().current('tickets.index')}
                                 >
-                                    Tickets registrados
+                                    Servicios registrados
                                 </NavLink>
                                 <NavLink
                                     href={route('tickets.create')}
                                     active={route().current('tickets.create')}
                                 >
-                                    Crear ticket
+                                    Crear servicio
                                 </NavLink>
                                 <NavLink
                                     href={route('clients.index')}
@@ -162,13 +162,13 @@ export default function AuthenticatedLayout({ header, children }) {
                             href={route('tickets.index')}
                             active={route().current('tickets.index')}
                         >
-                            Tickets registrados
+                            Servicios registrados
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             href={route('tickets.create')}
                             active={route().current('tickets.create')}
                         >
-                            Crear ticket
+                            Crear servicio
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             href={route('clients.index')}

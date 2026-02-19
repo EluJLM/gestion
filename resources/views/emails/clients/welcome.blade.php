@@ -14,7 +14,7 @@
         {{ $client->document_type }} {{ $client->document_number }}
     </p>
 
-    <p>Desde ahora podremos gestionar tus tickets de soporte de manera más ágil.</p>
+    <p>Desde ahora podremos gestionar tus servicios de soporte de manera más ágil.</p>
 
     <p style="margin-top: 24px;">Gracias por confiar en nosotros.</p>
 </body>

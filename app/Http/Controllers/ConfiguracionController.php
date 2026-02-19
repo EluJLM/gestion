@@ -136,7 +136,7 @@ class ConfiguracionController extends Controller
 
         Mail::mailer('company_smtp')->raw('Este es un correo de prueba para verificar la configuración SMTP.', function ($message) use ($validated, $mailSetting): void {
             $message->to($validated['test_email'])
-                ->subject('Prueba SMTP - Gestión de tickets')
+                ->subject('Prueba SMTP - Gestión de servicios')
                 ->from($mailSetting->mail_from_address, $mailSetting->mail_from_name);
         });
 

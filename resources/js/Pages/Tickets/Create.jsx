@@ -66,11 +66,11 @@ export default function TicketsCreate({ statuses }) {
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Crear ticket
+                    Crear servicio
                 </h2>
             }
         >
-            <Head title="Crear ticket" />
+            <Head title="Crear servicio" />
 
             <div className="py-10">
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
@@ -205,7 +205,7 @@ export default function TicketsCreate({ statuses }) {
                             <InputError className="mt-1" message={errors.client_id} />
                         </div>
 
-                        <PrimaryButton disabled={processing}>Guardar ticket</PrimaryButton>
+                        <PrimaryButton disabled={processing}>Guardar servicio</PrimaryButton>
                     </form>
                 </div>
             </div>

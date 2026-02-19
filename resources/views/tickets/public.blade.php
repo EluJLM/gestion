@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle público del ticket</title>
+    <title>Detalle público del servicio</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; padding: 24px; }
         .card { max-width: 820px; margin: 0 auto; background: white; border-radius: 8px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="card">
-        <h1>Ticket #{{ $ticket->id }}</h1>
+        <h1>Servicio #{{ $ticket->id }}</h1>
 
         <div class="label">Título</div>
         <div class="value">{{ $ticket->title }}</div>

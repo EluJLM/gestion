@@ -21,7 +21,7 @@ class TicketCreatedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Tu ticket fue creado correctamente',
+            subject: 'Tu servicio fue creado correctamente',
         );
     }
 
