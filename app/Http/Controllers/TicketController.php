@@ -5,22 +5,23 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Mail\TicketCreatedMail;
-use App\Models\Client;
-use App\Models\MailSetting;
 use App\Models\Ticket;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Mail;
+use App\Support\UsesCompanyMailer;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class TicketController extends Controller
 {
+    use UsesCompanyMailer;
+
     public function index(): Response
     {
         return Inertia::render('Tickets/Index', [
             'tickets' => Ticket::query()
-                ->with('client')
+                ->with(['client', 'images'])
                 ->latest()
                 ->get(),
             'statuses' => Ticket::statuses(),
@@ -31,19 +32,6 @@ class TicketController extends Controller
     {
         return Inertia::render('Tickets/Create', [
             'statuses' => Ticket::statuses(),
-            'documentTypes' => ['CC', 'CE', 'NIT', 'PASAPORTE'],
-            'previousClients' => Client::query()
-                ->latest()
-                ->limit(100)
-                ->get([
-                    'id',
-                    'name',
-                    'email',
-                    'document_type',
-                    'document_number',
-                    'phone',
-                    'address',
-                ]),
         ]);
     }
 
@@ -51,44 +39,38 @@ class TicketController extends Controller
     {
         $validated = $request->validated();
 
-        $client = Client::updateOrCreate(
-            [
-                'document_type' => $validated['client']['document_type'],
-                'document_number' => $validated['client']['document_number'],
-            ],
-            $validated['client'],
-        );
-
         $ticket = Ticket::create([
-            'client_id' => $client->id,
+            'client_id' => $validated['client_id'],
             'title' => $validated['title'],
             'description' => $validated['description'],
             'type' => $validated['type'],
             'observation' => $validated['observation'] ?? null,
             'estimated_price' => $validated['estimated_price'] ?? null,
             'status' => $validated['status'],
+            'closed_at' => $validated['status'] === Ticket::STATUS_CLOSED ? now() : null,
         ])->load('client');
 
-        $mailSetting = MailSetting::query()->first();
+        foreach ($request->file('images', []) as $imageFile) {
+            $uploaded = $this->uploadToImgbb($imageFile);
 
-        if ($mailSetting) {
-            $this->applyCompanyMailer($mailSetting);
-
-            Mail::mailer('company_smtp')
-                ->to($client->email)
-                ->send((new TicketCreatedMail($ticket))
-                    ->from($mailSetting->mail_from_address, $mailSetting->mail_from_name));
-        } else {
-            Mail::to($client->email)->send(new TicketCreatedMail($ticket));
+            $ticket->images()->create([
+                'url' => $uploaded['url'],
+                'delete_url' => $uploaded['delete_url'] ?? null,
+            ]);
         }
+
+        $this->sendCompanyAwareMail($ticket->client->email, new TicketCreatedMail($ticket));
 
         return to_route('tickets.index');
     }
 
     public function updateStatus(UpdateTicketStatusRequest $request, Ticket $ticket)
     {
+        $newStatus = $request->validated('status');
+
         $ticket->update([
-            'status' => $request->validated('status'),
+            'status' => $newStatus,
+            'closed_at' => $newStatus === Ticket::STATUS_CLOSED ? now() : null,
         ]);
 
         return to_route('tickets.index');
@@ -97,7 +79,7 @@ class TicketController extends Controller
     public function publicShow(string $token)
     {
         $ticket = Ticket::query()
-            ->with('client')
+            ->with(['client', 'images'])
             ->where('public_token', $token)
             ->firstOrFail();
 
@@ -106,13 +88,32 @@ class TicketController extends Controller
         ]);
     }
 
-    private function applyCompanyMailer(MailSetting $mailSetting): void
+    private function uploadToImgbb(UploadedFile $imageFile): array
     {
-        Config::set('mail.mailers.company_smtp.transport', $mailSetting->mail_mailer);
-        Config::set('mail.mailers.company_smtp.host', $mailSetting->mail_host);
-        Config::set('mail.mailers.company_smtp.port', $mailSetting->mail_port);
-        Config::set('mail.mailers.company_smtp.username', $mailSetting->mail_username);
-        Config::set('mail.mailers.company_smtp.password', Crypt::decryptString($mailSetting->mail_password));
-        Config::set('mail.mailers.company_smtp.encryption', $mailSetting->mail_encryption ?: null);
+        $apiKey = config('services.imgbb.key');
+
+        if (! $apiKey) {
+            throw ValidationException::withMessages([
+                'images' => 'Debes configurar IMGBB_API_KEY para subir imágenes.',
+            ]);
+        }
+
+        $response = Http::asMultipart()
+            ->post('https://api.imgbb.com/1/upload', [
+                ['name' => 'key', 'contents' => $apiKey],
+                ['name' => 'image', 'contents' => base64_encode($imageFile->get())],
+                ['name' => 'name', 'contents' => pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME)],
+            ]);
+
+        if (! $response->successful() || ! data_get($response->json(), 'success')) {
+            throw ValidationException::withMessages([
+                'images' => 'No fue posible subir una imagen a ImgBB.',
+            ]);
+        }
+
+        return [
+            'url' => data_get($response->json(), 'data.url'),
+            'delete_url' => data_get($response->json(), 'data.delete_url'),
+        ];
     }
 }

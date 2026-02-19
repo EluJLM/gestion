@@ -1,212 +1,165 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
-import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+
+function HomeIcon() {
+    return (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5L12 3l9 7.5" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 9.8V21h14V9.8" />
+        </svg>
+    );
+}
+
+function ListIcon() {
+    return (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 6h12M8 12h12M8 18h12" />
+            <circle cx="4" cy="6" r="1" />
+            <circle cx="4" cy="12" r="1" />
+            <circle cx="4" cy="18" r="1" />
+        </svg>
+    );
+}
+
+function PlusIcon() {
+    return (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+        </svg>
+    );
+}
+
+function UserIcon() {
+    return (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 20a7 7 0 0114 0" />
+            <circle cx="12" cy="9" r="3.5" />
+        </svg>
+    );
+}
+
+
+function ProfileIcon() {
+    return (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <circle cx="12" cy="8" r="3" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 20a7 7 0 0114 0" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.5 6.5l2 2-4 4-2-2 4-4z" />
+        </svg>
+    );
+}
+
+function SettingsIcon() {
+    return (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.4 15a1 1 0 00.2 1.1l.1.1a2 2 0 01-2.8 2.8l-.1-.1a1 1 0 00-1.1-.2 1 1 0 00-.6.9V20a2 2 0 01-4 0v-.2a1 1 0 00-.6-.9 1 1 0 00-1.1.2l-.1.1a2 2 0 01-2.8-2.8l.1-.1a1 1 0 00.2-1.1 1 1 0 00-.9-.6H4a2 2 0 010-4h.2a1 1 0 00.9-.6 1 1 0 00-.2-1.1l-.1-.1a2 2 0 012.8-2.8l.1.1a1 1 0 001.1.2 1 1 0 00.6-.9V4a2 2 0 014 0v.2a1 1 0 00.6.9 1 1 0 001.1-.2l.1-.1a2 2 0 012.8 2.8l-.1.1a1 1 0 00-.2 1.1 1 1 0 00.9.6H20a2 2 0 010 4h-.2a1 1 0 00-.9.6z" />
+        </svg>
+    );
+}
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+    const navItems = useMemo(
+        () => [
+            { label: 'Dashboard', href: route('dashboard'), active: route().current('dashboard'), icon: <HomeIcon /> },
+            { label: 'Servicios registrados', href: route('tickets.index'), active: route().current('tickets.index'), icon: <ListIcon /> },
+            { label: 'Crear servicio', href: route('tickets.create'), active: route().current('tickets.create'), icon: <PlusIcon /> },
+            { label: 'Clientes', href: route('clients.index'), active: route().current('clients.*'), icon: <UserIcon /> },
+            { label: 'Mi perfil', href: route('profile.edit'), active: route().current('profile.*'), icon: <ProfileIcon /> },
+            { label: 'Configuración', href: route('configuracion.edit'), active: route().current('configuracion.*'), icon: <SettingsIcon /> },
+        ],
+        [],
+    );
+
+    const SidebarContent = (
+        <div className="flex h-full flex-col">
+            <div className="border-b border-gray-200 px-5 py-5">
+                <Link href="/" className="flex items-center gap-3 text-gray-800">
+                    <ApplicationLogo className="h-9 w-auto fill-current text-gray-800" />
+                    <span className="text-2xl font-semibold">Panel</span>
+                </Link>
+            </div>
+
+            <div className="flex-1 space-y-2 px-3 py-5">
+                {navItems.map((item) => (
+                    <Link
+                        key={item.label}
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                            item.active
+                                ? 'bg-indigo-600 text-white shadow'
+                                : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                    >
+                        {item.icon}
+                        <span>{item.label}</span>
+                    </Link>
+                ))}
+            </div>
+
+            <div className="border-t border-gray-200 p-4">
+                <p className="mb-2 text-sm font-semibold text-gray-800">{user.name}</p>
+                <p className="mb-3 text-xs text-gray-500">{user.email}</p>
+                <Link
+                    href={route('logout')}
+                    method="post"
+                    as="button"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-700 hover:bg-gray-50"
+                >
+                    Cerrar sesión
+                </Link>
+            </div>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            <div className="flex shrink-0 items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
-                                </Link>
-                            </div>
+            <div className="fixed left-0 top-0 z-40 hidden h-screen w-72 border-r border-gray-200 bg-white md:block">
+                {SidebarContent}
+            </div>
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
-                                <NavLink
-                                    href={route('tickets.index')}
-                                    active={route().current('tickets.index')}
-                                >
-                                    Tickets registrados
-                                </NavLink>
-                                <NavLink
-                                    href={route('tickets.create')}
-                                    active={route().current('tickets.create')}
-                                >
-                                    Crear ticket
-                                </NavLink>
-                                <NavLink
-                                    href={route('configuracion.edit')}
-                                    active={route().current('configuracion.*')}
-                                >
-                                    Configuración
-                                </NavLink>
-                            </div>
+            <div className="md:pl-72">
+                <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden">
+                    <button
+                        onClick={() => setSidebarOpen(true)}
+                        className="rounded-md border border-gray-300 px-2 py-1.5 text-gray-700"
+                        aria-label="Abrir menú"
+                    >
+                        ☰
+                    </button>
+                    {header && (
+                        <div className="min-w-0 flex-1 truncate text-gray-800 [&>h2]:truncate [&>h2]:text-base [&>h2]:font-semibold [&>h2]:leading-tight">
+                            {header}
                         </div>
-
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user.name}
-
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
-
-                                    <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
-                                        >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <div className="-me-2 flex items-center sm:hidden">
-                            <button
-                                onClick={() =>
-                                    setShowingNavigationDropdown(
-                                        (previousState) => !previousState,
-                                    )
-                                }
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    className="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        className={
-                                            !showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={
-                                            showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 <div
-                    className={
-                        (showingNavigationDropdown ? 'block' : 'hidden') +
-                        ' sm:hidden'
-                    }
+                    className={`fixed inset-0 z-50 md:hidden ${sidebarOpen ? 'block' : 'hidden'}`}
+                    role="dialog"
+                    aria-modal="true"
                 >
-                    <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href={route('tickets.index')}
-                            active={route().current('tickets.index')}
-                        >
-                            Tickets registrados
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href={route('tickets.create')}
-                            active={route().current('tickets.create')}
-                        >
-                            Crear ticket
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href={route('configuracion.edit')}
-                            active={route().current('configuracion.*')}
-                        >
-                            Configuración
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div className="border-t border-gray-200 pb-1 pt-4">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
-                                {user.name}
-                            </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user.email}
-                            </div>
-                        </div>
-
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
+                    <button
+                        type="button"
+                        className="absolute inset-0 bg-black/40"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                    <aside className="relative h-full w-72 bg-white shadow-xl">{SidebarContent}</aside>
                 </div>
-            </nav>
 
-            {header && (
-                <header className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                        {header}
-                    </div>
-                </header>
-            )}
+                {header && (
+                    <header className="hidden border-b border-gray-200 bg-white shadow-sm md:block">
+                        <div className="px-4 py-6 sm:px-6 lg:px-8">{header}</div>
+                    </header>
+                )}
 
-            <main>{children}</main>
+                <main className="p-0">{children}</main>
+            </div>
         </div>
     );
 }

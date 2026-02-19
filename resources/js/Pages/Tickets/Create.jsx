@@ -4,7 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const statusLabels = {
     pending: 'Pendiente',
@@ -13,7 +13,7 @@ const statusLabels = {
     closed: 'Cerrado',
 };
 
-export default function TicketsCreate({ statuses, documentTypes, previousClients }) {
+export default function TicketsCreate({ statuses }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         description: '',
@@ -21,90 +21,73 @@ export default function TicketsCreate({ statuses, documentTypes, previousClients
         observation: '',
         estimated_price: '',
         status: 'pending',
-        client: {
-            name: '',
-            email: '',
-            document_type: 'CC',
-            document_number: '',
-            phone: '',
-            address: '',
-        },
+        client_id: '',
+        images: [],
     });
+
     const [clientQuery, setClientQuery] = useState('');
+    const [clients, setClients] = useState([]);
+    const [selectedClient, setSelectedClient] = useState(null);
+
+    useEffect(() => {
+        const timer = setTimeout(async () => {
+            const response = await fetch(
+                `${route('clients.search')}?query=${encodeURIComponent(clientQuery)}`,
+                {
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                },
+            );
+
+            const payload = await response.json();
+            setClients(payload.clients ?? []);
+        }, 250);
+
+        return () => clearTimeout(timer);
+    }, [clientQuery]);
 
     const submit = (e) => {
         e.preventDefault();
         post(route('tickets.store'), {
-            onSuccess: () => reset(),
+            forceFormData: true,
+            onSuccess: () => {
+                reset();
+                setSelectedClient(null);
+                setClientQuery('');
+            },
         });
     };
 
-    const updateClient = (field, value) => {
-        setData('client', {
-            ...data.client,
-            [field]: value,
-        });
-    };
-
-    const filteredClients = previousClients
-        .filter((client) => {
-            if (!clientQuery.trim()) {
-                return true;
-            }
-
-            const haystack = [
-                client.name,
-                client.email,
-                client.document_type,
-                client.document_number,
-                client.phone,
-            ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-
-            return haystack.includes(clientQuery.trim().toLowerCase());
-        })
-        .slice(0, 10);
-
-    const applyClient = (clientId) => {
-        const selectedClient = previousClients.find(
-            (client) => String(client.id) === String(clientId),
-        );
-
-        if (!selectedClient) {
-            return;
-        }
-
-        setData('client', {
-            ...data.client,
-            name: selectedClient.name ?? '',
-            email: selectedClient.email ?? '',
-            document_type: selectedClient.document_type ?? 'CC',
-            document_number: selectedClient.document_number ?? '',
-            phone: selectedClient.phone ?? '',
-            address: selectedClient.address ?? '',
-        });
+    const selectClient = (client) => {
+        setSelectedClient(client);
+        setData('client_id', client.id);
     };
 
     return (
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Crear ticket
+                    Crear servicio
                 </h2>
             }
         >
-            <Head title="Crear ticket" />
+            <Head title="Crear servicio" />
 
             <div className="py-10">
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-end">
+                    <div className="flex flex-wrap justify-end gap-2">
+                        <Link
+                            href={route('clients.index')}
+                            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50"
+                        >
+                            Gestionar clientes
+                        </Link>
                         <Link
                             href={route('tickets.index')}
                             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50"
                         >
-                            Ver tickets registrados
+                            Ver servicios registrados
                         </Link>
                     </div>
 
@@ -119,14 +102,9 @@ export default function TicketsCreate({ statuses, documentTypes, previousClients
                                     id="title"
                                     className="mt-1 block w-full"
                                     value={data.title}
-                                    onChange={(e) =>
-                                        setData('title', e.target.value)
-                                    }
+                                    onChange={(e) => setData('title', e.target.value)}
                                 />
-                                <InputError
-                                    className="mt-1"
-                                    message={errors.title}
-                                />
+                                <InputError className="mt-1" message={errors.title} />
                             </div>
                             <div>
                                 <InputLabel htmlFor="type" value="Tipo" />
@@ -134,63 +112,42 @@ export default function TicketsCreate({ statuses, documentTypes, previousClients
                                     id="type"
                                     className="mt-1 block w-full"
                                     value={data.type}
-                                    onChange={(e) =>
-                                        setData('type', e.target.value)
-                                    }
+                                    onChange={(e) => setData('type', e.target.value)}
                                 />
                                 <InputError className="mt-1" message={errors.type} />
                             </div>
                             <div className="md:col-span-2">
-                                <InputLabel
-                                    htmlFor="description"
-                                    value="Descripción"
-                                />
+                                <InputLabel htmlFor="description" value="Descripción" />
                                 <textarea
                                     id="description"
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                     value={data.description}
-                                    onChange={(e) =>
-                                        setData('description', e.target.value)
-                                    }
+                                    onChange={(e) => setData('description', e.target.value)}
                                 />
-                                <InputError
-                                    className="mt-1"
-                                    message={errors.description}
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <InputLabel
-                                    htmlFor="observation"
-                                    value="Observación"
-                                />
-                                <textarea
-                                    id="observation"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                    value={data.observation}
-                                    onChange={(e) =>
-                                        setData('observation', e.target.value)
-                                    }
-                                />
+                                <InputError className="mt-1" message={errors.description} />
                             </div>
                             <div>
-                                <InputLabel
-                                    htmlFor="estimated_price"
-                                    value="Precio estimado"
+                                <InputLabel htmlFor="observation" value="Observación" />
+                                <TextInput
+                                    id="observation"
+                                    className="mt-1 block w-full"
+                                    value={data.observation}
+                                    onChange={(e) => setData('observation', e.target.value)}
                                 />
+                                <InputError className="mt-1" message={errors.observation} />
+                            </div>
+                            <div>
+                                <InputLabel htmlFor="estimated_price" value="Precio estimado" />
                                 <TextInput
                                     id="estimated_price"
                                     type="number"
                                     step="0.01"
+                                    min="0"
                                     className="mt-1 block w-full"
                                     value={data.estimated_price}
-                                    onChange={(e) =>
-                                        setData('estimated_price', e.target.value)
-                                    }
+                                    onChange={(e) => setData('estimated_price', e.target.value)}
                                 />
-                                <InputError
-                                    className="mt-1"
-                                    message={errors.estimated_price}
-                                />
+                                <InputError className="mt-1" message={errors.estimated_price} />
                             </div>
                             <div>
                                 <InputLabel htmlFor="status" value="Estado" />
@@ -198,9 +155,7 @@ export default function TicketsCreate({ statuses, documentTypes, previousClients
                                     id="status"
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                     value={data.status}
-                                    onChange={(e) =>
-                                        setData('status', e.target.value)
-                                    }
+                                    onChange={(e) => setData('status', e.target.value)}
                                 >
                                     {statuses.map((status) => (
                                         <option key={status} value={status}>
@@ -210,178 +165,66 @@ export default function TicketsCreate({ statuses, documentTypes, previousClients
                                 </select>
                                 <InputError className="mt-1" message={errors.status} />
                             </div>
-                        </div>
 
-                        <h4 className="pt-2 text-md font-semibold text-gray-900">
-                            Datos del cliente
-                        </h4>
-
-                        <div className="rounded-md border border-gray-200 bg-gray-50 p-4">
-                            <h5 className="text-sm font-semibold text-gray-800">
-                                Buscar cliente anterior
-                            </h5>
-                            <p className="mt-1 text-sm text-gray-600">
-                                Escribe nombre, email o documento para reutilizar datos.
-                            </p>
-                            <div className="mt-3 grid gap-3 md:grid-cols-2">
-                                <div>
-                                    <InputLabel
-                                        htmlFor="client_search"
-                                        value="Buscar"
-                                    />
-                                    <TextInput
-                                        id="client_search"
-                                        className="mt-1 block w-full"
-                                        value={clientQuery}
-                                        onChange={(e) =>
-                                            setClientQuery(e.target.value)
-                                        }
-                                        placeholder="Ej: Ana, 123456, ana@correo.com"
-                                    />
-                                </div>
-                                <div>
-                                    <InputLabel
-                                        htmlFor="previous_client"
-                                        value="Clientes encontrados"
-                                    />
-                                    <select
-                                        id="previous_client"
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                        defaultValue=""
-                                        onChange={(e) => applyClient(e.target.value)}
-                                    >
-                                        <option value="" disabled>
-                                            Selecciona un cliente
-                                        </option>
-                                        {filteredClients.map((client) => (
-                                            <option key={client.id} value={client.id}>
-                                                {client.name} · {client.document_type}{' '}
-                                                {client.document_number} · {client.email}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <div>
-                                <InputLabel htmlFor="client_name" value="Nombre" />
-                                <TextInput
-                                    id="client_name"
-                                    className="mt-1 block w-full"
-                                    value={data.client.name}
-                                    onChange={(e) =>
-                                        updateClient('name', e.target.value)
-                                    }
-                                />
-                                <InputError
-                                    className="mt-1"
-                                    message={errors['client.name']}
-                                />
-                            </div>
-                            <div>
-                                <InputLabel htmlFor="client_email" value="Email" />
-                                <TextInput
-                                    id="client_email"
-                                    type="email"
-                                    className="mt-1 block w-full"
-                                    value={data.client.email}
-                                    onChange={(e) =>
-                                        updateClient('email', e.target.value)
-                                    }
-                                />
-                                <InputError
-                                    className="mt-1"
-                                    message={errors['client.email']}
-                                />
-                            </div>
-                            <div>
-                                <InputLabel
-                                    htmlFor="client_document_type"
-                                    value="Tipo de documento"
-                                />
-                                <select
-                                    id="client_document_type"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                    value={data.client.document_type}
-                                    onChange={(e) =>
-                                        updateClient('document_type', e.target.value)
-                                    }
-                                >
-                                    {documentTypes.map((documentType) => (
-                                        <option key={documentType} value={documentType}>
-                                            {documentType}
-                                        </option>
-                                    ))}
-                                </select>
-                                <InputError
-                                    className="mt-1"
-                                    message={errors['client.document_type']}
-                                />
-                            </div>
-                            <div>
-                                <InputLabel
-                                    htmlFor="client_document"
-                                    value="Número de documento"
-                                />
-                                <TextInput
-                                    id="client_document"
-                                    className="mt-1 block w-full"
-                                    value={data.client.document_number}
-                                    onChange={(e) =>
-                                        updateClient(
-                                            'document_number',
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                                <InputError
-                                    className="mt-1"
-                                    message={errors['client.document_number']}
-                                />
-                            </div>
-                            <div>
-                                <InputLabel
-                                    htmlFor="client_phone"
-                                    value="Teléfono"
-                                />
-                                <TextInput
-                                    id="client_phone"
-                                    className="mt-1 block w-full"
-                                    value={data.client.phone}
-                                    onChange={(e) =>
-                                        updateClient('phone', e.target.value)
-                                    }
-                                />
-                                <InputError
-                                    className="mt-1"
-                                    message={errors['client.phone']}
-                                />
-                            </div>
                             <div className="md:col-span-2">
-                                <InputLabel
-                                    htmlFor="client_address"
-                                    value="Dirección"
+                                <InputLabel htmlFor="images" value="Imágenes del servicio (ImgBB)" />
+                                <input
+                                    id="images"
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-sm"
+                                    onChange={(e) => setData('images', Array.from(e.target.files ?? []))}
                                 />
-                                <TextInput
-                                    id="client_address"
-                                    className="mt-1 block w-full"
-                                    value={data.client.address}
-                                    onChange={(e) =>
-                                        updateClient('address', e.target.value)
-                                    }
-                                />
-                                <InputError
-                                    className="mt-1"
-                                    message={errors['client.address']}
-                                />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Puedes subir varias imágenes. Se enviarán a ImgBB al guardar.
+                                </p>
+                                <InputError className="mt-1" message={errors.images} />
+                                <InputError className="mt-1" message={errors['images.0']} />
                             </div>
                         </div>
 
-                        <PrimaryButton disabled={processing}>
-                            Guardar ticket
-                        </PrimaryButton>
+                        <div className="space-y-3 rounded-md border border-gray-200 p-4">
+                            <h3 className="text-lg font-semibold text-gray-800">Cliente</h3>
+
+                            <div>
+                                <InputLabel htmlFor="client_search" value="Buscar cliente" />
+                                <TextInput
+                                    id="client_search"
+                                    className="mt-1 block w-full"
+                                    placeholder="Nombre, correo, documento o teléfono"
+                                    value={clientQuery}
+                                    onChange={(e) => setClientQuery(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                {clients.map((client) => (
+                                    <button
+                                        type="button"
+                                        key={client.id}
+                                        onClick={() => selectClient(client)}
+                                        className="rounded-md border border-gray-200 p-3 text-left hover:bg-gray-50"
+                                    >
+                                        <p className="font-medium text-gray-900">{client.name}</p>
+                                        <p className="text-sm text-gray-600">{client.email}</p>
+                                        <p className="text-xs text-gray-500">
+                                            {client.document_type} {client.document_number}
+                                        </p>
+                                    </button>
+                                ))}
+                            </div>
+
+                            {selectedClient && (
+                                <div className="rounded-md bg-green-50 p-3 text-sm text-green-800">
+                                    Cliente seleccionado: <strong>{selectedClient.name}</strong> ({selectedClient.email})
+                                </div>
+                            )}
+
+                            <InputError className="mt-1" message={errors.client_id} />
+                        </div>
+
+                        <PrimaryButton disabled={processing}>Guardar servicio</PrimaryButton>
                     </form>
                 </div>
             </div>

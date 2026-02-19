@@ -2,37 +2,38 @@
 
 namespace App\Mail;
 
-use App\Models\Ticket;
+use App\Models\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class TicketCreatedMail extends Mailable
+class ClientWelcomeMail extends Mailable
 {
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public Ticket $ticket)
+    public function __construct(public Client $client)
     {
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Tu servicio fue creado correctamente',
+            subject: 'Bienvenido(a) a nuestro sistema de soporte',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.tickets.created',
-            with: [
-                'ticket' => $this->ticket,
-                'publicUrl' => route('tickets.public.show', $this->ticket->public_token),
-            ],
+            view: 'emails.clients.welcome',
         );
+    }
+
+    public function attachments(): array
+    {
+        return [];
     }
 }
