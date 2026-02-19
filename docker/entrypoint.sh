@@ -11,8 +11,18 @@ composer install --no-interaction --prefer-dist --optimize-autoloader
 npm ci
 npm run build
 
-if ! grep -q '^APP_KEY=base64:' .env; then
-  php artisan key:generate --force
+CURRENT_APP_KEY="$(grep '^APP_KEY=' .env 2>/dev/null | head -n1 | cut -d'=' -f2- || true)"
+
+if [ -z "${CURRENT_APP_KEY}" ] || [ "${CURRENT_APP_KEY}" = "null" ]; then
+  if [ -n "${APP_KEY:-}" ]; then
+    if grep -q '^APP_KEY=' .env; then
+      sed -i "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" .env
+    else
+      echo "APP_KEY=${APP_KEY}" >> .env
+    fi
+  else
+    php artisan key:generate --force
+  fi
 fi
 
 php artisan migrate --force

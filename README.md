@@ -74,6 +74,7 @@ En cada reinicio del contenedor `app`, el entrypoint ejecuta automáticamente:
 - `php artisan migrate --force`
 - `php artisan optimize:clear`
 - `php artisan config:cache`
+- crea `APP_KEY` solo si no existe (o usa `APP_KEY` del entorno si lo defines)
 
 ### Primer despliegue
 
