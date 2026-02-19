@@ -8,6 +8,14 @@ const statusLabels = {
     closed: 'Cerrado',
 };
 
+const formatDate = (value) => {
+    if (!value) {
+        return '—';
+    }
+
+    return new Date(value).toLocaleString('es-CO');
+};
+
 export default function TicketsIndex({ tickets, statuses }) {
     return (
         <AuthenticatedLayout
@@ -34,14 +42,66 @@ export default function TicketsIndex({ tickets, statuses }) {
                         <h3 className="mb-4 text-lg font-semibold text-gray-900">
                             Listado de servicios
                         </h3>
-                        <div className="overflow-x-auto">
+
+                        <div className="space-y-3 md:hidden">
+                            {tickets.length === 0 && (
+                                <p className="rounded-md border border-dashed border-gray-300 px-3 py-4 text-center text-sm text-gray-500">
+                                    No hay servicios registrados todavía.
+                                </p>
+                            )}
+
+                            {tickets.map((ticket) => (
+                                <details key={ticket.id} className="rounded-md border border-gray-200">
+                                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3">
+                                        <p className="font-medium text-gray-900">{ticket.title}</p>
+                                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
+                                            {statusLabels[ticket.status] ?? ticket.status}
+                                        </span>
+                                    </summary>
+                                    <div className="space-y-2 border-t border-gray-100 px-3 py-3 text-sm text-gray-700">
+                                        <p><strong>Descripción:</strong> {ticket.description}</p>
+                                        <p><strong>Cliente:</strong> {ticket.client.name}</p>
+                                        <p><strong>Tipo:</strong> {ticket.type}</p>
+                                        <p><strong>Precio:</strong> {ticket.estimated_price ?? 'N/A'}</p>
+                                        <p><strong>Creación:</strong> {formatDate(ticket.created_at)}</p>
+                                        <p><strong>Cierre:</strong> {formatDate(ticket.closed_at)}</p>
+                                        <p><strong>Imágenes:</strong> {ticket.images?.length ?? 0}</p>
+                                        <div>
+                                            <label htmlFor={`mobile-status-${ticket.id}`} className="mb-1 block text-xs text-gray-500">Estado</label>
+                                            <select
+                                                id={`mobile-status-${ticket.id}`}
+                                                className="w-full rounded-md border-gray-300 text-sm"
+                                                value={ticket.status}
+                                                onChange={(e) =>
+                                                    router.patch(
+                                                        route('tickets.status.update', ticket.id),
+                                                        { status: e.target.value },
+                                                        { preserveScroll: true },
+                                                    )
+                                                }
+                                            >
+                                                {statuses.map((status) => (
+                                                    <option key={status} value={status}>
+                                                        {statusLabels[status] ?? status}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </details>
+                            ))}
+                        </div>
+
+                        <div className="hidden overflow-x-auto md:block">
                             <table className="min-w-full divide-y divide-gray-200 text-sm">
                                 <thead>
                                     <tr className="text-left text-xs uppercase text-gray-500">
                                         <th className="px-2 py-3">Título</th>
                                         <th className="px-2 py-3">Cliente</th>
                                         <th className="px-2 py-3">Tipo</th>
-                                        <th className="px-2 py-3">Precio</th>
+                                        <th className="px-2 py-3">Creación</th>
+                                        <th className="px-2 py-3">Cierre</th>
+                                        <th className="px-2 py-3">Imágenes</th>
                                         <th className="px-2 py-3">Estado</th>
                                     </tr>
                                 </thead>
@@ -49,7 +109,7 @@ export default function TicketsIndex({ tickets, statuses }) {
                                     {tickets.length === 0 && (
                                         <tr>
                                             <td
-                                                colSpan={5}
+                                                colSpan={7}
                                                 className="px-2 py-4 text-center text-gray-500"
                                             >
                                                 No hay servicios registrados todavía.
@@ -72,42 +132,25 @@ export default function TicketsIndex({ tickets, statuses }) {
                                                     {ticket.client.email}
                                                 </p>
                                             </td>
-                                            <td className="px-2 py-3 text-gray-700">
-                                                {ticket.type}
-                                            </td>
-                                            <td className="px-2 py-3 text-gray-700">
-                                                {ticket.estimated_price ?? 'N/A'}
-                                            </td>
+                                            <td className="px-2 py-3 text-gray-700">{ticket.type}</td>
+                                            <td className="px-2 py-3 text-gray-700">{formatDate(ticket.created_at)}</td>
+                                            <td className="px-2 py-3 text-gray-700">{formatDate(ticket.closed_at)}</td>
+                                            <td className="px-2 py-3 text-gray-700">{ticket.images?.length ?? 0}</td>
                                             <td className="px-2 py-3">
                                                 <select
                                                     className="rounded-md border-gray-300 text-sm"
                                                     value={ticket.status}
                                                     onChange={(e) =>
                                                         router.patch(
-                                                            route(
-                                                                'tickets.status.update',
-                                                                ticket.id,
-                                                            ),
-                                                            {
-                                                                status:
-                                                                    e.target
-                                                                        .value,
-                                                            },
-                                                            {
-                                                                preserveScroll:
-                                                                    true,
-                                                            },
+                                                            route('tickets.status.update', ticket.id),
+                                                            { status: e.target.value },
+                                                            { preserveScroll: true },
                                                         )
                                                     }
                                                 >
                                                     {statuses.map((status) => (
-                                                        <option
-                                                            key={status}
-                                                            value={status}
-                                                        >
-                                                            {statusLabels[
-                                                                status
-                                                            ] ?? status}
+                                                        <option key={status} value={status}>
+                                                            {statusLabels[status] ?? status}
                                                         </option>
                                                     ))}
                                                 </select>

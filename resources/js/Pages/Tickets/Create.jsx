@@ -22,6 +22,7 @@ export default function TicketsCreate({ statuses }) {
         estimated_price: '',
         status: 'pending',
         client_id: '',
+        images: [],
     });
 
     const [clientQuery, setClientQuery] = useState('');
@@ -49,6 +50,7 @@ export default function TicketsCreate({ statuses }) {
     const submit = (e) => {
         e.preventDefault();
         post(route('tickets.store'), {
+            forceFormData: true,
             onSuccess: () => {
                 reset();
                 setSelectedClient(null);
@@ -85,7 +87,7 @@ export default function TicketsCreate({ statuses }) {
                             href={route('tickets.index')}
                             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50"
                         >
-                            Ver tickets registrados
+                            Ver servicios registrados
                         </Link>
                     </div>
 
@@ -162,6 +164,23 @@ export default function TicketsCreate({ statuses }) {
                                     ))}
                                 </select>
                                 <InputError className="mt-1" message={errors.status} />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <InputLabel htmlFor="images" value="Imágenes del servicio (ImgBB)" />
+                                <input
+                                    id="images"
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-sm"
+                                    onChange={(e) => setData('images', Array.from(e.target.files ?? []))}
+                                />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Puedes subir varias imágenes. Se enviarán a ImgBB al guardar.
+                                </p>
+                                <InputError className="mt-1" message={errors.images} />
+                                <InputError className="mt-1" message={errors['images.0']} />
                             </div>
                         </div>
 

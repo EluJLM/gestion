@@ -34,6 +34,13 @@
         <div class="label">Precio estimado</div>
         <div class="value">{{ $ticket->estimated_price ?? 'No definido' }}</div>
 
+
+        <div class="label">Fecha de creación</div>
+        <div class="value">{{ optional($ticket->created_at)->format('Y-m-d H:i') }}</div>
+
+        <div class="label">Fecha de cierre</div>
+        <div class="value">{{ optional($ticket->closed_at)->format('Y-m-d H:i') ?? 'No cerrado' }}</div>
+
         <hr>
 
         <h3>Datos del cliente</h3>
@@ -51,6 +58,15 @@
 
         <div class="label">Dirección</div>
         <div class="value">{{ $ticket->client->address }}</div>
+
+        <div class="label">Imágenes</div>
+        <div class="value">
+            @forelse ($ticket->images as $image)
+                <a href="{{ $image->url }}" target="_blank" rel="noopener noreferrer">Ver imagen {{ $loop->iteration }}</a><br>
+            @empty
+                Sin imágenes
+            @endforelse
+        </div>
     </div>
 </body>
 </html>

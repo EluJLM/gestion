@@ -15,6 +15,8 @@ class TicketFactory extends Factory
 
     public function definition(): array
     {
+        $status = fake()->randomElement(Ticket::statuses());
+
         return [
             'client_id' => Client::factory(),
             'title' => fake()->sentence(4),
@@ -22,7 +24,8 @@ class TicketFactory extends Factory
             'type' => fake()->randomElement(['Soporte', 'Hardware', 'Software']),
             'observation' => fake()->optional()->sentence(),
             'estimated_price' => fake()->randomFloat(2, 50, 500),
-            'status' => fake()->randomElement(Ticket::statuses()),
+            'status' => $status,
+            'closed_at' => $status === Ticket::STATUS_CLOSED ? now() : null,
         ];
     }
 }

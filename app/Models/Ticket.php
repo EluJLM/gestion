@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Ticket extends Model
@@ -24,9 +25,15 @@ class Ticket extends Model
         'observation',
         'estimated_price',
         'status',
+        'closed_at',
         'public_token',
     ];
 
+    protected $casts = [
+        'closed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     protected static function booted(): void
     {
@@ -50,5 +57,10 @@ class Ticket extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(TicketImage::class);
     }
 }

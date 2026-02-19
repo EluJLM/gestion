@@ -23,6 +23,8 @@ class StoreTicketRequest extends FormRequest
             'estimated_price' => ['nullable', 'numeric', 'min:0'],
             'status' => ['required', Rule::in(Ticket::statuses())],
             'client_id' => ['required', 'integer', 'exists:clients,id'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['image', 'max:5120'],
         ];
     }
 }

@@ -7,6 +7,9 @@ use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Mail\TicketCreatedMail;
 use App\Models\Ticket;
 use App\Support\UsesCompanyMailer;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,7 +21,7 @@ class TicketController extends Controller
     {
         return Inertia::render('Tickets/Index', [
             'tickets' => Ticket::query()
-                ->with('client')
+                ->with(['client', 'images'])
                 ->latest()
                 ->get(),
             'statuses' => Ticket::statuses(),
@@ -44,7 +47,17 @@ class TicketController extends Controller
             'observation' => $validated['observation'] ?? null,
             'estimated_price' => $validated['estimated_price'] ?? null,
             'status' => $validated['status'],
+            'closed_at' => $validated['status'] === Ticket::STATUS_CLOSED ? now() : null,
         ])->load('client');
+
+        foreach ($request->file('images', []) as $imageFile) {
+            $uploaded = $this->uploadToImgbb($imageFile);
+
+            $ticket->images()->create([
+                'url' => $uploaded['url'],
+                'delete_url' => $uploaded['delete_url'] ?? null,
+            ]);
+        }
 
         $this->sendCompanyAwareMail($ticket->client->email, new TicketCreatedMail($ticket));
 
@@ -53,8 +66,11 @@ class TicketController extends Controller
 
     public function updateStatus(UpdateTicketStatusRequest $request, Ticket $ticket)
     {
+        $newStatus = $request->validated('status');
+
         $ticket->update([
-            'status' => $request->validated('status'),
+            'status' => $newStatus,
+            'closed_at' => $newStatus === Ticket::STATUS_CLOSED ? now() : null,
         ]);
 
         return to_route('tickets.index');
@@ -63,12 +79,41 @@ class TicketController extends Controller
     public function publicShow(string $token)
     {
         $ticket = Ticket::query()
-            ->with('client')
+            ->with(['client', 'images'])
             ->where('public_token', $token)
             ->firstOrFail();
 
         return view('tickets.public', [
             'ticket' => $ticket,
         ]);
+    }
+
+    private function uploadToImgbb(UploadedFile $imageFile): array
+    {
+        $apiKey = config('services.imgbb.key');
+
+        if (! $apiKey) {
+            throw ValidationException::withMessages([
+                'images' => 'Debes configurar IMGBB_API_KEY para subir imágenes.',
+            ]);
+        }
+
+        $response = Http::asMultipart()
+            ->post('https://api.imgbb.com/1/upload', [
+                ['name' => 'key', 'contents' => $apiKey],
+                ['name' => 'image', 'contents' => base64_encode($imageFile->get())],
+                ['name' => 'name', 'contents' => pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME)],
+            ]);
+
+        if (! $response->successful() || ! data_get($response->json(), 'success')) {
+            throw ValidationException::withMessages([
+                'images' => 'No fue posible subir una imagen a ImgBB.',
+            ]);
+        }
+
+        return [
+            'url' => data_get($response->json(), 'data.url'),
+            'delete_url' => data_get($response->json(), 'data.delete_url'),
+        ];
     }
 }
