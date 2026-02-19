@@ -112,14 +112,19 @@ export default function AuthenticatedLayout({ header, children }) {
             </div>
 
             <div className="md:pl-72">
-                <div className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 md:hidden">
+                <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden">
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="rounded-md border border-gray-300 px-2 py-1.5 text-gray-700"
+                        aria-label="Abrir menú"
                     >
                         ☰
                     </button>
-                    <p className="text-sm font-semibold text-gray-800">{user.name}</p>
+                    {header && (
+                        <div className="min-w-0 flex-1 truncate text-gray-800 [&>h2]:truncate [&>h2]:text-base [&>h2]:font-semibold [&>h2]:leading-tight">
+                            {header}
+                        </div>
+                    )}
                 </div>
 
                 <div
@@ -136,7 +141,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
 
                 {header && (
-                    <header className="border-b border-gray-200 bg-white shadow-sm">
+                    <header className="hidden border-b border-gray-200 bg-white shadow-sm md:block">
                         <div className="px-4 py-6 sm:px-6 lg:px-8">{header}</div>
                     </header>
                 )}
