@@ -119,6 +119,30 @@ class TicketManagementTest extends TestCase
         $filteredResponse->assertDontSee($todayTicket->title);
     }
 
+
+
+    public function test_index_can_filter_by_multiple_statuses(): void
+    {
+        $user = User::factory()->create();
+        $pendingTicket = Ticket::factory()->create([
+            'service_date' => now()->toDateString(),
+            'status' => Ticket::STATUS_PENDING,
+        ]);
+        $closedTicket = Ticket::factory()->create([
+            'service_date' => now()->toDateString(),
+            'status' => Ticket::STATUS_CLOSED,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('tickets.index', [
+            'date' => now()->toDateString(),
+            'statuses' => [Ticket::STATUS_PENDING],
+        ]));
+
+        $response->assertOk();
+        $response->assertSee($pendingTicket->title);
+        $response->assertDontSee($closedTicket->title);
+    }
+
     public function test_public_ticket_link_displays_ticket_without_authentication(): void
     {
         $ticket = Ticket::factory()->create();

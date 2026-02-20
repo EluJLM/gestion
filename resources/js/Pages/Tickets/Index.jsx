@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 const statusLabels = {
     pending: 'Pendiente',
-    in_progress: 'En progreso',
+    in_progress: 'En proceso',
     resolved: 'Resuelto',
     closed: 'Cerrado',
 };
@@ -27,6 +27,18 @@ const formatDate = (value) => {
 export default function TicketsIndex({ tickets, statuses, filters, stats }) {
     const [documentFilter, setDocumentFilter] = useState(filters?.document ?? '');
     const [dateFilter, setDateFilter] = useState(filters?.date ?? '');
+    const [statusFilter, setStatusFilter] = useState(filters?.statuses?.length ? filters.statuses : statuses);
+
+    const toggleStatus = (status) => {
+        setStatusFilter((previous) => {
+            if (previous.includes(status)) {
+                const updated = previous.filter((item) => item !== status);
+                return updated.length > 0 ? updated : statuses;
+            }
+
+            return [...previous, status];
+        });
+    };
 
     const searchTickets = (e) => {
         e.preventDefault();
@@ -36,6 +48,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
             {
                 document: documentFilter,
                 date: dateFilter,
+                statuses: statusFilter,
             },
             {
                 preserveState: true,
@@ -48,12 +61,14 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
         const today = new Date().toISOString().slice(0, 10);
         setDocumentFilter('');
         setDateFilter(today);
+        setStatusFilter(statuses);
 
         router.get(
             route('tickets.index'),
             {
                 date: today,
                 document: '',
+                statuses,
             },
             {
                 preserveState: true,
@@ -83,7 +98,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                         </Link>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-4">
+                    <div className="grid gap-4 md:grid-cols-5">
                         <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-4">
                             <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Servicios hoy</p>
                             <p className="mt-2 text-3xl font-bold text-indigo-900">{stats.total}</p>
@@ -97,50 +112,76 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                             <p className="mt-2 text-3xl font-bold text-sky-900">{stats.in_progress}</p>
                         </div>
                         <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">Resueltos</p>
+                            <p className="mt-2 text-3xl font-bold text-emerald-700">{stats.resolved}</p>
+                        </div>
+                        <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4">
                             <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">Cerrados</p>
                             <p className="mt-2 text-3xl font-bold text-emerald-900">{stats.closed}</p>
                         </div>
                     </div>
 
-                    <form onSubmit={searchTickets} className="grid gap-3 rounded-lg bg-white p-4 shadow md:grid-cols-[1fr_220px_auto_auto] md:items-end">
-                        <div>
-                            <label htmlFor="document_filter" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                Buscar por cédula del cliente
-                            </label>
-                            <input
-                                id="document_filter"
-                                type="text"
-                                className="block w-full rounded-md border-gray-300 text-sm shadow-sm"
-                                value={documentFilter}
-                                onChange={(e) => setDocumentFilter(e.target.value)}
-                                placeholder="Ej: 10203040"
-                            />
+                    <form onSubmit={searchTickets} className="grid gap-3 rounded-lg bg-white p-4 shadow">
+                        <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+                            <div>
+                                <label htmlFor="document_filter" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                    Buscar por cédula del cliente
+                                </label>
+                                <input
+                                    id="document_filter"
+                                    type="text"
+                                    className="block w-full rounded-md border-gray-300 text-sm shadow-sm"
+                                    value={documentFilter}
+                                    onChange={(e) => setDocumentFilter(e.target.value)}
+                                    placeholder="Ej: 10203040"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="date_filter" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                    Fecha
+                                </label>
+                                <input
+                                    id="date_filter"
+                                    type="date"
+                                    className="block w-full rounded-md border-gray-300 text-sm shadow-sm"
+                                    value={dateFilter}
+                                    onChange={(e) => setDateFilter(e.target.value)}
+                                />
+                            </div>
                         </div>
+
                         <div>
-                            <label htmlFor="date_filter" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                Fecha
-                            </label>
-                            <input
-                                id="date_filter"
-                                type="date"
-                                className="block w-full rounded-md border-gray-300 text-sm shadow-sm"
-                                value={dateFilter}
-                                onChange={(e) => setDateFilter(e.target.value)}
-                            />
+                            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Estados (bool)</p>
+                            <div className="flex flex-wrap gap-3">
+                                {statuses.map((status) => (
+                                    <label key={status} className="inline-flex items-center gap-2 text-sm text-gray-700">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded border-gray-300 text-indigo-600"
+                                            checked={statusFilter.includes(status)}
+                                            onChange={() => toggleStatus(status)}
+                                        />
+                                        {statusLabels[status] ?? status}
+                                    </label>
+                                ))}
+                            </div>
                         </div>
-                        <button
-                            type="submit"
-                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-indigo-500"
-                        >
-                            Buscar
-                        </button>
-                        <button
-                            type="button"
-                            onClick={resetFilters}
-                            className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50"
-                        >
-                            Hoy
-                        </button>
+
+                        <div className="flex flex-wrap gap-2">
+                            <button
+                                type="submit"
+                                className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-indigo-500"
+                            >
+                                Buscar
+                            </button>
+                            <button
+                                type="button"
+                                onClick={resetFilters}
+                                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50"
+                            >
+                                Hoy
+                            </button>
+                        </div>
                     </form>
 
                     <div className="rounded-lg bg-white p-6 shadow">

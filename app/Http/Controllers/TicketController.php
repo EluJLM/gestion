@@ -12,6 +12,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -25,14 +26,25 @@ class TicketController extends Controller
         $validated = $request->validate([
             'document' => ['nullable', 'string', 'max:60'],
             'date' => ['nullable', 'date'],
+            'statuses' => ['nullable', 'array'],
+            'statuses.*' => ['string', Rule::in(Ticket::statuses())],
         ]);
 
         $selectedDate = $validated['date'] ?? now()->toDateString();
         $document = trim((string) ($validated['document'] ?? ''));
+        $statusFilters = collect($validated['statuses'] ?? Ticket::statuses())
+            ->filter(fn (mixed $status): bool => in_array($status, Ticket::statuses(), true))
+            ->values()
+            ->all();
+
+        if ($statusFilters === []) {
+            $statusFilters = Ticket::statuses();
+        }
 
         $tickets = Ticket::query()
             ->with(['client', 'images'])
             ->whereDate('service_date', Carbon::parse($selectedDate))
+            ->whereIn('status', $statusFilters)
             ->when($document !== '', function ($query) use ($document) {
                 $query->whereHas('client', function ($clientQuery) use ($document) {
                     $clientQuery->where('document_number', 'like', "%{$document}%");
@@ -56,11 +68,13 @@ class TicketController extends Controller
             'filters' => [
                 'document' => $document,
                 'date' => $selectedDate,
+                'statuses' => $statusFilters,
             ],
             'stats' => [
                 'total' => $tickets->count(),
                 'pending' => $tickets->where('status', Ticket::STATUS_PENDING)->count(),
                 'in_progress' => $tickets->where('status', Ticket::STATUS_IN_PROGRESS)->count(),
+                'resolved' => $tickets->where('status', Ticket::STATUS_RESOLVED)->count(),
                 'closed' => $tickets->where('status', Ticket::STATUS_CLOSED)->count(),
             ],
         ]);
@@ -138,10 +152,15 @@ class TicketController extends Controller
     {
         return implode("\n", [
             'Hola '.$ticket->client->name.', tu servicio fue creado correctamente.',
-            'Servicio: '.$ticket->title,
-            'Dirección: '.$ticket->client->address,
-            'Fecha del servicio: '.$ticket->service_date?->format('d/m/Y'),
-            'Verificación y seguimiento: '.$publicUrl,
+            '',
+            '• Servicio: '.$ticket->title,
+            '• Dirección: '.$ticket->client->address,
+            '• Fecha del servicio: '.$ticket->service_date?->format('d/m/Y'),
+            '',
+            '• Verificación y seguimiento:',
+            $publicUrl,
+            '',
+            'Gracias por confiar en nosotros.',
         ]);
     }
 
