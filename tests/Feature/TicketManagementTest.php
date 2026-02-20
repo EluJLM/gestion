@@ -89,6 +89,34 @@ class TicketManagementTest extends TestCase
         $this->assertNotNull($ticket->closed_at);
     }
 
+
+
+    public function test_index_shows_today_tickets_by_default_and_allows_filtering(): void
+    {
+        $user = User::factory()->create();
+        $todayTicket = Ticket::factory()->create([
+            'created_at' => now(),
+        ]);
+        $oldTicket = Ticket::factory()->create([
+            'created_at' => now()->subDay(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('tickets.index'));
+
+        $response->assertOk();
+        $response->assertSee($todayTicket->title);
+        $response->assertDontSee($oldTicket->title);
+
+        $filteredResponse = $this->actingAs($user)->get(route('tickets.index', [
+            'date' => now()->subDay()->toDateString(),
+            'document' => $oldTicket->client->document_number,
+        ]));
+
+        $filteredResponse->assertOk();
+        $filteredResponse->assertSee($oldTicket->title);
+        $filteredResponse->assertDontSee($todayTicket->title);
+    }
+
     public function test_public_ticket_link_displays_ticket_without_authentication(): void
     {
         $ticket = Ticket::factory()->create();

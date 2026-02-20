@@ -7,7 +7,9 @@ use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Mail\TicketCreatedMail;
 use App\Models\Ticket;
 use App\Support\UsesCompanyMailer;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -18,14 +20,49 @@ class TicketController extends Controller
 {
     use UsesCompanyMailer;
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $validated = $request->validate([
+            'document' => ['nullable', 'string', 'max:60'],
+            'date' => ['nullable', 'date'],
+        ]);
+
+        $selectedDate = $validated['date'] ?? now()->toDateString();
+        $document = trim((string) ($validated['document'] ?? ''));
+
+        $tickets = Ticket::query()
+            ->with(['client', 'images'])
+            ->whereDate('created_at', Carbon::parse($selectedDate))
+            ->when($document !== '', function ($query) use ($document) {
+                $query->whereHas('client', function ($clientQuery) use ($document) {
+                    $clientQuery->where('document_number', 'like', "%{$document}%");
+                });
+            })
+            ->latest()
+            ->get()
+            ->map(function (Ticket $ticket) {
+                $publicUrl = route('tickets.public.show', $ticket->public_token);
+                $whatsappMessage = $this->buildWhatsappMessage($ticket, $publicUrl);
+
+                return [
+                    ...$ticket->toArray(),
+                    'whatsapp_url' => $this->buildWhatsappUrl($ticket->client->phone, $whatsappMessage),
+                ];
+            });
+
         return Inertia::render('Tickets/Index', [
-            'tickets' => Ticket::query()
-                ->with(['client', 'images'])
-                ->latest()
-                ->get(),
+            'tickets' => $tickets,
             'statuses' => Ticket::statuses(),
+            'filters' => [
+                'document' => $document,
+                'date' => $selectedDate,
+            ],
+            'stats' => [
+                'total' => $tickets->count(),
+                'pending' => $tickets->where('status', Ticket::STATUS_PENDING)->count(),
+                'in_progress' => $tickets->where('status', Ticket::STATUS_IN_PROGRESS)->count(),
+                'closed' => $tickets->where('status', Ticket::STATUS_CLOSED)->count(),
+            ],
         ]);
     }
 

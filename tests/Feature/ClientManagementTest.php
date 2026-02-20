@@ -24,6 +24,7 @@ class ClientManagementTest extends TestCase
             'email' => 'maria@example.com',
             'document_type' => 'CC',
             'document_number' => '10203040',
+            'phone_country_code' => '+57',
             'phone' => '3001112233',
             'address' => 'Carrera 10 #20-30',
         ]);
@@ -34,6 +35,7 @@ class ClientManagementTest extends TestCase
             'email' => 'maria@example.com',
             'document_type' => 'CC',
             'document_number' => '10203040',
+            'phone' => '+573001112233',
         ]);
 
         Mail::assertSent(ClientWelcomeMail::class);
@@ -49,6 +51,7 @@ class ClientManagementTest extends TestCase
             'email' => $client->email,
             'document_type' => $client->document_type,
             'document_number' => $client->document_number,
+            'phone_country_code' => '+57',
             'phone' => '3004445566',
             'address' => 'Dirección nueva',
         ]);
@@ -58,7 +61,7 @@ class ClientManagementTest extends TestCase
         $this->assertDatabaseHas('clients', [
             'id' => $client->id,
             'name' => 'Cliente Actualizado',
-            'phone' => '3004445566',
+            'phone' => '+573004445566',
         ]);
     }
 }

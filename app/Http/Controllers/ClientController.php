@@ -22,12 +22,24 @@ class ClientController extends Controller
                 ->latest()
                 ->get(),
             'documentTypes' => ['CC', 'CE', 'NIT', 'PASAPORTE'],
+            'countryIndicators' => [
+                ['code' => '+57', 'label' => '🇨🇴 Colombia (+57)'],
+                ['code' => '+1', 'label' => '🇺🇸/🇨🇦 USA/Canadá (+1)'],
+                ['code' => '+34', 'label' => '🇪🇸 España (+34)'],
+                ['code' => '+52', 'label' => '🇲🇽 México (+52)'],
+            ],
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate($this->rules());
+        $validated['phone'] = $this->buildFullPhone(
+            $validated['phone_country_code'],
+            $validated['phone'],
+        );
+
+        unset($validated['phone_country_code']);
 
         $client = Client::create($validated);
 
@@ -39,6 +51,12 @@ class ClientController extends Controller
     public function update(Request $request, Client $client)
     {
         $validated = $request->validate($this->rules($client->id));
+        $validated['phone'] = $this->buildFullPhone(
+            $validated['phone_country_code'],
+            $validated['phone'],
+        );
+
+        unset($validated['phone_country_code']);
 
         $client->update($validated);
 
@@ -89,8 +107,14 @@ class ClientController extends Controller
                     ->ignore($clientId)
                     ->where(fn ($query) => $query->where('document_type', request('document_type'))),
             ],
-            'phone' => ['required', 'string', 'max:50'],
+            'phone_country_code' => ['required', 'regex:/^\+[0-9]{1,4}$/'],
+            'phone' => ['required', 'regex:/^[0-9]{7,15}$/'],
             'address' => ['required', 'string', 'max:255'],
         ];
+    }
+
+    private function buildFullPhone(string $countryCode, string $phone): string
+    {
+        return $countryCode.$phone;
     }
 }

@@ -6,16 +6,33 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
+const splitPhone = (phone = '') => {
+    const match = `${phone}`.match(/^(\+[0-9]{1,4})([0-9]+)$/);
+
+    if (!match) {
+        return {
+            phone_country_code: '+57',
+            phone: phone?.replace(/\D/g, '') ?? '',
+        };
+    }
+
+    return {
+        phone_country_code: match[1],
+        phone: match[2],
+    };
+};
+
 const emptyClient = {
     name: '',
     email: '',
     document_type: 'CC',
     document_number: '',
+    phone_country_code: '+57',
     phone: '',
     address: '',
 };
 
-export default function ClientsIndex({ clients, documentTypes }) {
+export default function ClientsIndex({ clients, documentTypes, countryIndicators }) {
     const [editingClient, setEditingClient] = useState(null);
 
     const createForm = useForm(emptyClient);
@@ -24,18 +41,21 @@ export default function ClientsIndex({ clients, documentTypes }) {
     const createClient = (e) => {
         e.preventDefault();
         createForm.post(route('clients.store'), {
-            onSuccess: () => createForm.reset(),
+            onSuccess: () => createForm.reset('name', 'email', 'document_type', 'document_number', 'phone', 'address'),
         });
     };
 
     const startEditing = (client) => {
         setEditingClient(client);
+        const parsedPhone = splitPhone(client.phone);
+
         editForm.setData({
             name: client.name ?? '',
             email: client.email ?? '',
             document_type: client.document_type ?? 'CC',
             document_number: client.document_number ?? '',
-            phone: client.phone ?? '',
+            phone_country_code: parsedPhone.phone_country_code,
+            phone: parsedPhone.phone,
             address: client.address ?? '',
         });
     };
@@ -106,12 +126,30 @@ export default function ClientsIndex({ clients, documentTypes }) {
                 </div>
                 <div>
                     <InputLabel htmlFor={`${buttonText}_phone`} value="Teléfono" />
-                    <TextInput
-                        id={`${buttonText}_phone`}
-                        className="mt-1 block w-full"
-                        value={form.data.phone}
-                        onChange={(e) => form.setData('phone', e.target.value)}
-                    />
+                    <div className="mt-1 grid grid-cols-[180px_1fr] gap-2">
+                        <select
+                            id={`${buttonText}_phone_country_code`}
+                            className="rounded-md border-gray-300 shadow-sm"
+                            value={form.data.phone_country_code}
+                            onChange={(e) => form.setData('phone_country_code', e.target.value)}
+                        >
+                            {countryIndicators.map((country) => (
+                                <option key={country.code} value={country.code}>
+                                    {country.label}
+                                </option>
+                            ))}
+                        </select>
+                        <TextInput
+                            id={`${buttonText}_phone`}
+                            className="block w-full"
+                            inputMode="numeric"
+                            value={form.data.phone}
+                            onChange={(e) => form.setData('phone', e.target.value.replace(/\D/g, ''))}
+                            placeholder="Solo números"
+                        />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Por defecto se usa Colombia (+57).</p>
+                    <InputError className="mt-1" message={form.errors.phone_country_code} />
                     <InputError className="mt-1" message={form.errors.phone} />
                 </div>
                 <div>
