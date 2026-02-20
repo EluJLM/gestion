@@ -47,7 +47,12 @@ class TicketManagementTest extends TestCase
             ],
         ]);
 
-        $response->assertRedirect(route('tickets.index'));
+        $response->assertRedirect(route('tickets.create'));
+
+        $response->assertSessionHas('ticketCreated.whatsapp_url', function (string $whatsappUrl): bool {
+            return str_contains($whatsappUrl, 'api.whatsapp.com/send')
+                && str_contains($whatsappUrl, rawurlencode('/servicio/'));
+        });
 
         Mail::assertSent(TicketCreatedMail::class);
 

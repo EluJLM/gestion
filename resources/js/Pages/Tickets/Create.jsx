@@ -1,10 +1,12 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
+import Modal from '@/Components/Modal';
 import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
 
 const statusLabels = {
     pending: 'Pendiente',
@@ -14,6 +16,9 @@ const statusLabels = {
 };
 
 export default function TicketsCreate({ statuses }) {
+    const { props } = usePage();
+    const ticketCreatedFlash = props.flash?.ticketCreated;
+
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         description: '',
@@ -28,6 +33,17 @@ export default function TicketsCreate({ statuses }) {
     const [clientQuery, setClientQuery] = useState('');
     const [clients, setClients] = useState([]);
     const [selectedClient, setSelectedClient] = useState(null);
+    const [showWhatsappModal, setShowWhatsappModal] = useState(false);
+    const [copySuccess, setCopySuccess] = useState('');
+
+    const whatsappUrl = ticketCreatedFlash?.whatsapp_url ?? '';
+    const whatsappMessage = ticketCreatedFlash?.whatsapp_message ?? '';
+
+    useEffect(() => {
+        if (ticketCreatedFlash?.whatsapp_url) {
+            setShowWhatsappModal(true);
+        }
+    }, [ticketCreatedFlash]);
 
     useEffect(() => {
         const timer = setTimeout(async () => {
@@ -55,14 +71,36 @@ export default function TicketsCreate({ statuses }) {
                 reset();
                 setSelectedClient(null);
                 setClientQuery('');
+                setCopySuccess('');
             },
         });
+    };
+
+    const copyWhatsappLink = async () => {
+        if (!whatsappUrl) {
+            return;
+        }
+
+        await navigator.clipboard.writeText(whatsappUrl);
+        setCopySuccess('Enlace copiado al portapapeles.');
     };
 
     const selectClient = (client) => {
         setSelectedClient(client);
         setData('client_id', client.id);
     };
+
+    const notification = useMemo(() => {
+        if (!ticketCreatedFlash?.message) {
+            return null;
+        }
+
+        return (
+            <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
+                {ticketCreatedFlash.message}
+            </div>
+        );
+    }, [ticketCreatedFlash]);
 
     return (
         <AuthenticatedLayout
@@ -76,6 +114,8 @@ export default function TicketsCreate({ statuses }) {
 
             <div className="py-10">
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
+                    {notification}
+
                     <div className="flex flex-wrap justify-end gap-2">
                         <Link
                             href={route('clients.index')}
@@ -228,6 +268,38 @@ export default function TicketsCreate({ statuses }) {
                     </form>
                 </div>
             </div>
+
+            <Modal show={showWhatsappModal} onClose={() => setShowWhatsappModal(false)}>
+                <div className="space-y-4 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900">Mensaje para WhatsApp</h3>
+                    <p className="text-sm text-gray-600">
+                        Este es el mensaje que se enviará al cliente por WhatsApp.
+                    </p>
+                    <pre className="whitespace-pre-wrap rounded-md bg-gray-100 p-3 text-sm text-gray-800">
+                        {whatsappMessage}
+                    </pre>
+                    <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block break-all text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                    >
+                        {whatsappUrl}
+                    </a>
+                    {copySuccess && <p className="text-sm text-green-700">{copySuccess}</p>}
+
+                    <div className="flex justify-end gap-2">
+                        <SecondaryButton onClick={copyWhatsappLink}>Copiar enlace</SecondaryButton>
+                        <PrimaryButton
+                            onClick={() => {
+                                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+                            }}
+                        >
+                            Abrir en otra pestaña
+                        </PrimaryButton>
+                    </div>
+                </div>
+            </Modal>
         </AuthenticatedLayout>
     );
 }

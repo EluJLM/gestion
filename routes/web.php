@@ -21,7 +21,7 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/tickets/public/{token}', [TicketController::class, 'publicShow'])->name('tickets.public.show');
+Route::get('/servicio/{token}', [TicketController::class, 'publicShow'])->name('tickets.public.show');
 
 Route::middleware('auth')->group(function () {
 
