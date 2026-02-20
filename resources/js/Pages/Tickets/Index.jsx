@@ -27,6 +27,7 @@ const formatDate = (value) => {
 export default function TicketsIndex({ tickets, statuses, filters, stats }) {
     const [documentFilter, setDocumentFilter] = useState(filters?.document ?? '');
     const [dateFilter, setDateFilter] = useState(filters?.date ?? '');
+    const [periodFilter, setPeriodFilter] = useState(filters?.period ?? 'day');
     const [statusFilter, setStatusFilter] = useState(filters?.statuses?.length ? filters.statuses : statuses);
 
     const toggleStatus = (status) => {
@@ -48,6 +49,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
             {
                 document: documentFilter,
                 date: dateFilter,
+                period: periodFilter,
                 statuses: statusFilter,
             },
             {
@@ -61,12 +63,14 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
         const today = new Date().toISOString().slice(0, 10);
         setDocumentFilter('');
         setDateFilter(today);
+        setPeriodFilter('day');
         setStatusFilter(statuses);
 
         router.get(
             route('tickets.index'),
             {
                 date: today,
+                period: 'day',
                 document: '',
                 statuses,
             },
@@ -122,7 +126,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                     </div>
 
                     <form onSubmit={searchTickets} className="grid gap-3 rounded-lg bg-white p-4 shadow">
-                        <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+                        <div className="grid gap-3 md:grid-cols-[1fr_220px_220px]">
                             <div>
                                 <label htmlFor="document_filter" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
                                     Buscar por cédula del cliente
@@ -147,6 +151,22 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                                     value={dateFilter}
                                     onChange={(e) => setDateFilter(e.target.value)}
                                 />
+                            </div>
+                            <div>
+                                <label htmlFor="period_filter" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                    Rango
+                                </label>
+                                <select
+                                    id="period_filter"
+                                    className="block w-full rounded-md border-gray-300 text-sm shadow-sm"
+                                    value={periodFilter}
+                                    onChange={(e) => setPeriodFilter(e.target.value)}
+                                >
+                                    <option value="day">Día</option>
+                                    <option value="week">Semana</option>
+                                    <option value="month">Mes</option>
+                                    <option value="year">Año</option>
+                                </select>
                             </div>
                         </div>
 

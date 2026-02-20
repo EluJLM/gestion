@@ -143,6 +143,30 @@ class TicketManagementTest extends TestCase
         $response->assertDontSee($closedTicket->title);
     }
 
+
+
+    public function test_index_can_filter_by_week_period(): void
+    {
+        $user = User::factory()->create();
+
+        $inWeekTicket = Ticket::factory()->create([
+            'service_date' => now()->startOfWeek()->addDays(2)->toDateString(),
+        ]);
+
+        $outWeekTicket = Ticket::factory()->create([
+            'service_date' => now()->subWeeks(2)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('tickets.index', [
+            'date' => now()->toDateString(),
+            'period' => 'week',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee($inWeekTicket->title);
+        $response->assertDontSee($outWeekTicket->title);
+    }
+
     public function test_public_ticket_link_displays_ticket_without_authentication(): void
     {
         $ticket = Ticket::factory()->create();

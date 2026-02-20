@@ -26,11 +26,13 @@ class TicketController extends Controller
         $validated = $request->validate([
             'document' => ['nullable', 'string', 'max:60'],
             'date' => ['nullable', 'date'],
+            'period' => ['nullable', 'string', Rule::in(['day', 'week', 'month', 'year'])],
             'statuses' => ['nullable', 'array'],
             'statuses.*' => ['string', Rule::in(Ticket::statuses())],
         ]);
 
         $selectedDate = $validated['date'] ?? now()->toDateString();
+        $period = $validated['period'] ?? 'day';
         $document = trim((string) ($validated['document'] ?? ''));
         $statusFilters = collect($validated['statuses'] ?? Ticket::statuses())
             ->filter(fn (mixed $status): bool => in_array($status, Ticket::statuses(), true))
@@ -41,9 +43,18 @@ class TicketController extends Controller
             $statusFilters = Ticket::statuses();
         }
 
+        $baseDate = Carbon::parse($selectedDate);
+
+        [$startDate, $endDate] = match ($period) {
+            'week' => [$baseDate->copy()->startOfWeek(), $baseDate->copy()->endOfWeek()],
+            'month' => [$baseDate->copy()->startOfMonth(), $baseDate->copy()->endOfMonth()],
+            'year' => [$baseDate->copy()->startOfYear(), $baseDate->copy()->endOfYear()],
+            default => [$baseDate->copy()->startOfDay(), $baseDate->copy()->endOfDay()],
+        };
+
         $tickets = Ticket::query()
             ->with(['client', 'images'])
-            ->whereDate('service_date', Carbon::parse($selectedDate))
+            ->whereBetween('service_date', [$startDate->toDateString(), $endDate->toDateString()])
             ->whereIn('status', $statusFilters)
             ->when($document !== '', function ($query) use ($document) {
                 $query->whereHas('client', function ($clientQuery) use ($document) {
@@ -68,6 +79,7 @@ class TicketController extends Controller
             'filters' => [
                 'document' => $document,
                 'date' => $selectedDate,
+                'period' => $period,
                 'statuses' => $statusFilters,
             ],
             'stats' => [
