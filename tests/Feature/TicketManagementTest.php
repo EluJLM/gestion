@@ -167,6 +167,24 @@ class TicketManagementTest extends TestCase
         $response->assertDontSee($outWeekTicket->title);
     }
 
+
+
+    public function test_index_generates_public_token_for_legacy_ticket_without_token(): void
+    {
+        $user = User::factory()->create();
+        $ticket = Ticket::factory()->create([
+            'service_date' => now()->toDateString(),
+            'public_token' => null,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('tickets.index'));
+
+        $response->assertOk();
+        $ticket->refresh();
+
+        $this->assertNotNull($ticket->public_token);
+    }
+
     public function test_public_ticket_link_displays_ticket_without_authentication(): void
     {
         $ticket = Ticket::factory()->create();

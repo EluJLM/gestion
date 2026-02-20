@@ -64,11 +64,13 @@ class TicketController extends Controller
             ->latest()
             ->get()
             ->map(function (Ticket $ticket) {
-                $publicUrl = route('tickets.public.show', $ticket->public_token);
+                $token = $this->ensurePublicToken($ticket);
+                $publicUrl = route('tickets.public.show', $token);
                 $whatsappMessage = $this->buildWhatsappMessage($ticket, $publicUrl);
 
                 return [
                     ...$ticket->toArray(),
+                    'public_token' => $token,
                     'whatsapp_url' => $this->buildWhatsappUrl($ticket->client->phone, $whatsappMessage),
                 ];
             });
@@ -158,6 +160,20 @@ class TicketController extends Controller
         return view('tickets.public', [
             'ticket' => $ticket,
         ]);
+    }
+
+
+    private function ensurePublicToken(Ticket $ticket): string
+    {
+        if (filled($ticket->public_token)) {
+            return $ticket->public_token;
+        }
+
+        $ticket->forceFill([
+            'public_token' => (string) Str::uuid(),
+        ])->save();
+
+        return $ticket->public_token;
     }
 
     private function buildWhatsappMessage(Ticket $ticket, string $publicUrl): string
