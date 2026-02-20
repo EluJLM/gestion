@@ -6,10 +6,14 @@
     <title>Detalle público del servicio</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; padding: 24px; }
-        .card { max-width: 820px; margin: 0 auto; background: white; border-radius: 8px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+        .card { max-width: 900px; margin: 0 auto; background: white; border-radius: 8px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
         h1 { margin-top: 0; }
         .label { color: #6b7280; font-size: 13px; }
         .value { margin-bottom: 14px; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-top: 10px; }
+        .image-card { display: block; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; background: #f9fafb; }
+        .image-card img { width: 100%; height: 130px; object-fit: cover; display: block; }
+        .image-card span { display: block; font-size: 12px; padding: 6px 8px; color: #4b5563; }
     </style>
 </head>
 <body>
@@ -33,7 +37,6 @@
 
         <div class="label">Precio estimado</div>
         <div class="value">{{ $ticket->estimated_price ?? 'No definido' }}</div>
-
 
         <div class="label">Fecha de creación</div>
         <div class="value">{{ optional($ticket->created_at)->format('Y-m-d H:i') }}</div>
@@ -61,11 +64,18 @@
 
         <div class="label">Imágenes</div>
         <div class="value">
-            @forelse ($ticket->images as $image)
-                <a href="{{ $image->url }}" target="_blank" rel="noopener noreferrer">Ver imagen {{ $loop->iteration }}</a><br>
-            @empty
+            @if ($ticket->images->isNotEmpty())
+                <div class="gallery">
+                    @foreach ($ticket->images as $image)
+                        <a href="{{ $image->url }}" target="_blank" rel="noopener noreferrer" class="image-card">
+                            <img src="{{ $image->url }}" alt="Imagen {{ $loop->iteration }} del servicio" loading="lazy">
+                            <span>Ver imagen {{ $loop->iteration }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            @else
                 Sin imágenes
-            @endforelse
+            @endif
         </div>
     </div>
 </body>

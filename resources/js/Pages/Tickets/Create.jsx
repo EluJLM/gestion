@@ -39,6 +39,7 @@ export default function TicketsCreate({ statuses }) {
     const [showWhatsappModal, setShowWhatsappModal] = useState(false);
     const [copySuccess, setCopySuccess] = useState('');
     const [isServiceToday, setIsServiceToday] = useState(true);
+    const [imagePreviews, setImagePreviews] = useState([]);
 
     const whatsappUrl = ticketCreatedFlash?.whatsapp_url ?? '';
     const whatsappMessage = ticketCreatedFlash?.whatsapp_message ?? '';
@@ -67,6 +68,20 @@ export default function TicketsCreate({ statuses }) {
         return () => clearTimeout(timer);
     }, [clientQuery]);
 
+
+    useEffect(() => {
+        const previews = (data.images ?? []).map((imageFile) => ({
+            name: imageFile.name,
+            url: URL.createObjectURL(imageFile),
+        }));
+
+        setImagePreviews(previews);
+
+        return () => {
+            previews.forEach((preview) => URL.revokeObjectURL(preview.url));
+        };
+    }, [data.images]);
+
     const submit = (e) => {
         e.preventDefault();
         post(route('tickets.store'), {
@@ -77,6 +92,7 @@ export default function TicketsCreate({ statuses }) {
                 setIsServiceToday(true);
                 setSelectedClient(null);
                 setClientQuery('');
+                setData('images', []);
                 setCopySuccess('');
             },
         });
@@ -260,6 +276,28 @@ export default function TicketsCreate({ statuses }) {
                                 </p>
                                 <InputError className="mt-1" message={errors.images} />
                                 <InputError className="mt-1" message={errors['images.0']} />
+
+                                {imagePreviews.length > 0 && (
+                                    <div className="mt-3">
+                                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            Previsualización
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                                            {imagePreviews.map((preview) => (
+                                                <div key={preview.url} className="overflow-hidden rounded-md border border-gray-200 bg-gray-50">
+                                                    <img
+                                                        src={preview.url}
+                                                        alt={preview.name}
+                                                        className="h-28 w-full object-cover"
+                                                    />
+                                                    <p className="truncate px-2 py-1 text-xs text-gray-600" title={preview.name}>
+                                                        {preview.name}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
