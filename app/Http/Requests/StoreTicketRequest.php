@@ -22,6 +22,7 @@ class StoreTicketRequest extends FormRequest
             'observation' => ['nullable', 'string'],
             'estimated_price' => ['nullable', 'numeric', 'min:0'],
             'status' => ['required', Rule::in(Ticket::statuses())],
+            'service_date' => ['required', 'date'],
             'client_id' => ['required', 'integer', 'exists:clients,id'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'max:5120'],

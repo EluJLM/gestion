@@ -9,6 +9,13 @@ const statusLabels = {
     closed: 'Cerrado',
 };
 
+const statusClasses = {
+    pending: 'bg-red-100 text-red-700',
+    in_progress: 'bg-sky-100 text-sky-700',
+    resolved: 'bg-emerald-100 text-emerald-700',
+    closed: 'bg-emerald-100 text-emerald-800',
+};
+
 const formatDate = (value) => {
     if (!value) {
         return '—';
@@ -81,9 +88,9 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                             <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Servicios hoy</p>
                             <p className="mt-2 text-3xl font-bold text-indigo-900">{stats.total}</p>
                         </div>
-                        <div className="rounded-lg border border-amber-100 bg-amber-50 p-4">
-                            <p className="text-xs font-semibold uppercase tracking-widest text-amber-600">Pendientes</p>
-                            <p className="mt-2 text-3xl font-bold text-amber-900">{stats.pending}</p>
+                        <div className="rounded-lg border border-red-100 bg-red-50 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-red-600">Pendientes</p>
+                            <p className="mt-2 text-3xl font-bold text-red-700">{stats.pending}</p>
                         </div>
                         <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
                             <p className="text-xs font-semibold uppercase tracking-widest text-sky-600">En proceso</p>
@@ -152,7 +159,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                                 <details key={ticket.id} className="rounded-md border border-gray-200">
                                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3">
                                         <p className="font-medium text-gray-900">{ticket.title}</p>
-                                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
+                                        <span className={`rounded-full px-2 py-1 text-xs font-semibold ${statusClasses[ticket.status] ?? 'bg-gray-100 text-gray-700'}`}>
                                             {statusLabels[ticket.status] ?? ticket.status}
                                         </span>
                                     </summary>
@@ -162,6 +169,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                                         <p><strong>Cédula:</strong> {ticket.client.document_number}</p>
                                         <p><strong>Tipo:</strong> {ticket.type}</p>
                                         <p><strong>Precio:</strong> {ticket.estimated_price ?? 'N/A'}</p>
+                                        <p><strong>Fecha servicio:</strong> {formatDate(ticket.service_date)}</p>
                                         <p><strong>Creación:</strong> {formatDate(ticket.created_at)}</p>
                                         <p><strong>Cierre:</strong> {formatDate(ticket.closed_at)}</p>
                                         <p><strong>Imágenes:</strong> {ticket.images?.length ?? 0}</p>
@@ -237,6 +245,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                                             <td className="px-2 py-3 text-gray-700">
                                                 <p>{ticket.client.name}</p>
                                                 <p className="text-gray-500">{ticket.client.document_number}</p>
+                                                <p className="text-gray-500">Servicio: {formatDate(ticket.service_date)}</p>
                                             </td>
                                             <td className="px-2 py-3 text-gray-700">{ticket.type}</td>
                                             <td className="px-2 py-3 text-gray-700">{formatDate(ticket.created_at)}</td>

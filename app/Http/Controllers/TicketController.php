@@ -32,7 +32,7 @@ class TicketController extends Controller
 
         $tickets = Ticket::query()
             ->with(['client', 'images'])
-            ->whereDate('created_at', Carbon::parse($selectedDate))
+            ->whereDate('service_date', Carbon::parse($selectedDate))
             ->when($document !== '', function ($query) use ($document) {
                 $query->whereHas('client', function ($clientQuery) use ($document) {
                     $clientQuery->where('document_number', 'like', "%{$document}%");
@@ -85,6 +85,7 @@ class TicketController extends Controller
             'observation' => $validated['observation'] ?? null,
             'estimated_price' => $validated['estimated_price'] ?? null,
             'status' => $validated['status'],
+            'service_date' => $validated['service_date'],
             'closed_at' => $validated['status'] === Ticket::STATUS_CLOSED ? now() : null,
         ])->load('client');
 
@@ -139,6 +140,7 @@ class TicketController extends Controller
             'Hola '.$ticket->client->name.', tu servicio fue creado correctamente.',
             'Servicio: '.$ticket->title,
             'Dirección: '.$ticket->client->address,
+            'Fecha del servicio: '.$ticket->service_date?->format('d/m/Y'),
             'Verificación y seguimiento: '.$publicUrl,
         ]);
     }

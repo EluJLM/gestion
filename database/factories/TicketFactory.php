@@ -25,6 +25,7 @@ class TicketFactory extends Factory
             'observation' => fake()->optional()->sentence(),
             'estimated_price' => fake()->randomFloat(2, 50, 500),
             'status' => $status,
+            'service_date' => now()->toDateString(),
             'closed_at' => $status === Ticket::STATUS_CLOSED ? now() : null,
         ];
     }

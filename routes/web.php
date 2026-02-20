@@ -4,7 +4,9 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
+use App\Models\Ticket;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,8 +19,50 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+Route::get('/dashboard', function (Request $request) {
+    $monthStart = now()->startOfMonth();
+    $monthEnd = now()->endOfMonth();
+
+    $pendingTickets = Ticket::query()
+        ->with('client:id,name,document_number')
+        ->where('status', Ticket::STATUS_PENDING)
+        ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+        ->orderBy('service_date')
+        ->limit(8)
+        ->get(['id', 'client_id', 'title', 'service_date', 'status']);
+
+    $closedByDay = Ticket::query()
+        ->where('status', Ticket::STATUS_CLOSED)
+        ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+        ->selectRaw('DAY(service_date) as day, COUNT(*) as total')
+        ->groupBy('day')
+        ->orderBy('day')
+        ->get()
+        ->keyBy('day');
+
+    $chart = collect(range(1, $monthEnd->day))
+        ->map(fn (int $day) => [
+            'day' => $day,
+            'closed' => (int) ($closedByDay->get($day)->total ?? 0),
+        ]);
+
+    return Inertia::render('Dashboard', [
+        'pendingTickets' => $pendingTickets,
+        'monthlyMetrics' => [
+            'total' => Ticket::query()
+                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->count(),
+            'pending' => Ticket::query()
+                ->where('status', Ticket::STATUS_PENDING)
+                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->count(),
+            'closed' => Ticket::query()
+                ->where('status', Ticket::STATUS_CLOSED)
+                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->count(),
+        ],
+        'closedServicesChart' => $chart,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/servicio/{token}', [TicketController::class, 'publicShow'])->name('tickets.public.show');

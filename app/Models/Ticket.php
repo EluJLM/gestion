@@ -25,11 +25,13 @@ class Ticket extends Model
         'observation',
         'estimated_price',
         'status',
+        'service_date',
         'closed_at',
         'public_token',
     ];
 
     protected $casts = [
+        'service_date' => 'date',
         'closed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

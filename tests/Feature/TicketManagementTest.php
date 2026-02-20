@@ -41,6 +41,7 @@ class TicketManagementTest extends TestCase
             'observation' => 'Revisar cable de corriente',
             'estimated_price' => '120.50',
             'status' => Ticket::STATUS_CLOSED,
+            'service_date' => now()->toDateString(),
             'client_id' => $client->id,
             'images' => [
                 UploadedFile::fake()->image('equipo.jpg'),
@@ -59,6 +60,7 @@ class TicketManagementTest extends TestCase
         $this->assertDatabaseHas('tickets', [
             'title' => 'No enciende impresora',
             'status' => Ticket::STATUS_CLOSED,
+            'service_date' => now()->toDateString(),
             'client_id' => $client->id,
         ]);
 
@@ -95,10 +97,10 @@ class TicketManagementTest extends TestCase
     {
         $user = User::factory()->create();
         $todayTicket = Ticket::factory()->create([
-            'created_at' => now(),
+            'service_date' => now()->toDateString(),
         ]);
         $oldTicket = Ticket::factory()->create([
-            'created_at' => now()->subDay(),
+            'service_date' => now()->subDay()->toDateString(),
         ]);
 
         $response = $this->actingAs($user)->get(route('tickets.index'));

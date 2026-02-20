@@ -15,6 +15,8 @@ const statusLabels = {
     closed: 'Cerrado',
 };
 
+const todayString = () => new Date().toISOString().slice(0, 10);
+
 export default function TicketsCreate({ statuses }) {
     const { props } = usePage();
     const ticketCreatedFlash = props.flash?.ticketCreated;
@@ -26,6 +28,7 @@ export default function TicketsCreate({ statuses }) {
         observation: '',
         estimated_price: '',
         status: 'pending',
+        service_date: todayString(),
         client_id: '',
         images: [],
     });
@@ -35,6 +38,7 @@ export default function TicketsCreate({ statuses }) {
     const [selectedClient, setSelectedClient] = useState(null);
     const [showWhatsappModal, setShowWhatsappModal] = useState(false);
     const [copySuccess, setCopySuccess] = useState('');
+    const [isServiceToday, setIsServiceToday] = useState(true);
 
     const whatsappUrl = ticketCreatedFlash?.whatsapp_url ?? '';
     const whatsappMessage = ticketCreatedFlash?.whatsapp_message ?? '';
@@ -69,6 +73,8 @@ export default function TicketsCreate({ statuses }) {
             forceFormData: true,
             onSuccess: () => {
                 reset();
+                setData('service_date', todayString());
+                setIsServiceToday(true);
                 setSelectedClient(null);
                 setClientQuery('');
                 setCopySuccess('');
@@ -101,6 +107,19 @@ export default function TicketsCreate({ statuses }) {
             </div>
         );
     }, [ticketCreatedFlash]);
+
+    const handleTodayToggle = (checked) => {
+        setIsServiceToday(checked);
+
+        if (checked) {
+            setData('service_date', todayString());
+        }
+    };
+
+    const handleServiceDateChange = (value) => {
+        setData('service_date', value);
+        setIsServiceToday(value === todayString());
+    };
 
     return (
         <AuthenticatedLayout
@@ -204,6 +223,26 @@ export default function TicketsCreate({ statuses }) {
                                     ))}
                                 </select>
                                 <InputError className="mt-1" message={errors.status} />
+                            </div>
+                            <div>
+                                <InputLabel htmlFor="service_date" value="Fecha para realizar el servicio" />
+                                <input
+                                    id="service_date"
+                                    type="date"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                    value={data.service_date}
+                                    onChange={(e) => handleServiceDateChange(e.target.value)}
+                                />
+                                <label className="mt-2 inline-flex items-center gap-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded border-gray-300 text-indigo-600"
+                                        checked={isServiceToday}
+                                        onChange={(e) => handleTodayToggle(e.target.checked)}
+                                    />
+                                    Servicio para hoy
+                                </label>
+                                <InputError className="mt-1" message={errors.service_date} />
                             </div>
 
                             <div className="md:col-span-2">
