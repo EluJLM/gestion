@@ -4,10 +4,21 @@ services:
     container_name: gestion-app
     depends_on:
       - db
-    ports:
-      - "8000:8000"
     volumes:
       - ./.env:/var/www/.env
+    networks:
+      - gestion_net
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: gestion-nginx
+    depends_on:
+      - app
+    ports:
+      - "8000:8000"
     networks:
       - gestion_net
     restart: unless-stopped

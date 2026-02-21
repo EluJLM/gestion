@@ -1,0 +1,9 @@
+FROM nginx:1.27-alpine
+
+# Config
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Copiamos SOLO lo necesario para servir: /public
+COPY public /var/www/public
+
+# Si tu build de Vite queda en public/build, ya viene incluido por COPY public
