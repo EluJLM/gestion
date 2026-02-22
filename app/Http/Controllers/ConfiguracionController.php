@@ -32,11 +32,12 @@ class ConfiguracionController extends Controller
 
     private const MAIL_PORTS = [25, 465, 587, 2525];
 
-    public function edit(): Response
+    public function edit(Request $request): Response
     {
         return Inertia::render('Configuracion', [
-            'company' => Company::query()->first(),
+            'company' => Company::query()->find($request->user()->company_id),
             'mailSetting' => MailSetting::query()
+                ->where('company_id', $request->user()->company_id)
                 ->first([
                     'id',
                     'mail_mailer',
@@ -73,12 +74,12 @@ class ConfiguracionController extends Controller
             'logo_path' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $company = Company::query()->first();
+        $company = Company::query()->find($request->user()->company_id);
 
         if ($company) {
             $company->update($validated);
         } else {
-            Company::create($validated);
+            Company::create([...$validated, 'id' => $request->user()->company_id]);
         }
 
         return back();
@@ -97,7 +98,7 @@ class ConfiguracionController extends Controller
             'mail_from_name' => ['required', 'string', 'max:255'],
         ]);
 
-        $mailSetting = MailSetting::query()->first();
+        $mailSetting = MailSetting::query()->where('company_id', $request->user()->company_id)->first();
 
         if (! empty($validated['mail_password'])) {
             $validated['mail_password'] = Crypt::encryptString($validated['mail_password']);
@@ -112,7 +113,7 @@ class ConfiguracionController extends Controller
         if ($mailSetting) {
             $mailSetting->update($validated);
         } else {
-            MailSetting::create($validated);
+            MailSetting::create([...$validated, 'company_id' => $request->user()->company_id]);
         }
 
         return back();
@@ -124,7 +125,7 @@ class ConfiguracionController extends Controller
             'test_email' => ['required', 'email', 'max:255'],
         ]);
 
-        $mailSetting = MailSetting::query()->first();
+        $mailSetting = MailSetting::query()->where('company_id', $request->user()->company_id)->first();
 
         if (! $mailSetting) {
             return back()->withErrors([

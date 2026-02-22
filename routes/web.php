@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ConfiguracionController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\TicketController;
 use App\Models\Ticket;
+use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,10 +23,16 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function (Request $request) {
+    if ($request->user()->isSuperAdmin()) {
+        return to_route('super-admin.subscriptions.index');
+    }
+
     $monthStart = now()->startOfMonth();
     $monthEnd = now()->endOfMonth();
+    $companyId = $request->user()->company_id;
 
     $pendingTickets = Ticket::query()
+        ->where('company_id', $companyId)
         ->with('client:id,name,document_number')
         ->where('status', Ticket::STATUS_PENDING)
         ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
@@ -32,6 +41,7 @@ Route::get('/dashboard', function (Request $request) {
         ->get(['id', 'client_id', 'title', 'service_date', 'status']);
 
     $closedByDay = Ticket::query()
+        ->where('company_id', $companyId)
         ->where('status', Ticket::STATUS_CLOSED)
         ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
         ->selectRaw('DAY(service_date) as day, COUNT(*) as total')
@@ -49,26 +59,22 @@ Route::get('/dashboard', function (Request $request) {
     return Inertia::render('Dashboard', [
         'pendingTickets' => $pendingTickets,
         'monthlyMetrics' => [
-            'total' => Ticket::query()
-                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-                ->count(),
-            'pending' => Ticket::query()
+            'total' => Ticket::query()->where('company_id', $companyId)
+                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])->count(),
+            'pending' => Ticket::query()->where('company_id', $companyId)
                 ->where('status', Ticket::STATUS_PENDING)
-                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-                ->count(),
-            'closed' => Ticket::query()
+                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])->count(),
+            'closed' => Ticket::query()->where('company_id', $companyId)
                 ->where('status', Ticket::STATUS_CLOSED)
-                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-                ->count(),
+                ->whereBetween('service_date', [$monthStart->toDateString(), $monthEnd->toDateString()])->count(),
         ],
         'closedServicesChart' => $chart,
     ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'subscription.active'])->name('dashboard');
 
 Route::get('/servicio/{token}', [TicketController::class, 'publicShow'])->name('tickets.public.show');
 
-Route::middleware('auth')->group(function () {
-
+Route::middleware(['auth', 'subscription.active'])->group(function () {
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
     Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
@@ -83,10 +89,21 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/configuracion', [ConfiguracionController::class, 'edit'])->name('configuracion.edit');
-    Route::post('/configuracion/empresa', [ConfiguracionController::class, 'upsertCompany'])->name('configuracion.company.upsert');
-    Route::post('/configuracion/correo', [ConfiguracionController::class, 'upsertMail'])->name('configuracion.mail.upsert');
-    Route::post('/configuracion/correo/test', [ConfiguracionController::class, 'testMail'])->name('configuracion.mail.test');
+    Route::middleware('role:'.User::ROLE_TENANT_ADMIN)->group(function () {
+        Route::get('/configuracion', [ConfiguracionController::class, 'edit'])->name('configuracion.edit');
+        Route::post('/configuracion/empresa', [ConfiguracionController::class, 'upsertCompany'])->name('configuracion.company.upsert');
+        Route::post('/configuracion/correo', [ConfiguracionController::class, 'upsertMail'])->name('configuracion.mail.upsert');
+        Route::post('/configuracion/correo/test', [ConfiguracionController::class, 'testMail'])->name('configuracion.mail.test');
+
+        Route::get('/empleados', [EmployeeController::class, 'index'])->name('employees.index');
+        Route::post('/empleados', [EmployeeController::class, 'store'])->name('employees.store');
+        Route::delete('/empleados/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+    });
+});
+
+Route::middleware(['auth', 'role:'.User::ROLE_SUPER_ADMIN])->group(function () {
+    Route::get('/super-admin/suscripciones', [SuperAdminController::class, 'index'])->name('super-admin.subscriptions.index');
+    Route::patch('/super-admin/suscripciones/{company}', [SuperAdminController::class, 'update'])->name('super-admin.subscriptions.update');
 });
 
 require __DIR__.'/auth.php';
