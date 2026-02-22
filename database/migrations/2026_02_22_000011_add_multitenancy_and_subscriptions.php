@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
@@ -19,10 +20,12 @@ return new class extends Migration {
             $table->string('role')->default('tenant_admin')->after('password');
         });
 
+        $this->dropIndexIfExists('clients', 'clients_document_number_unique');
+        $this->dropIndexIfExists('clients', 'clients_document_type_document_number_unique');
+
         Schema::table('clients', function (Blueprint $table) {
             $table->foreignId('company_id')->nullable()->after('id')->constrained()->cascadeOnDelete();
             $table->index(['company_id', 'created_at']);
-            $table->dropUnique(['document_number']);
             $table->unique(['company_id', 'document_type', 'document_number'], 'clients_company_document_unique');
         });
 
@@ -52,8 +55,11 @@ return new class extends Migration {
         Schema::table('clients', function (Blueprint $table) {
             $table->dropUnique('clients_company_document_unique');
             $table->dropIndex(['company_id', 'created_at']);
-            $table->unique('document_number');
             $table->dropConstrainedForeignId('company_id');
+        });
+
+        Schema::table('clients', function (Blueprint $table) {
+            $table->unique(['document_type', 'document_number']);
         });
 
         Schema::table('users', function (Blueprint $table) {
@@ -69,5 +75,20 @@ return new class extends Migration {
                 'cancelled_at',
             ]);
         });
+    }
+
+    private function dropIndexIfExists(string $table, string $indexName): void
+    {
+        $databaseName = DB::getDatabaseName();
+
+        $exists = DB::table('information_schema.statistics')
+            ->where('table_schema', $databaseName)
+            ->where('table_name', $table)
+            ->where('index_name', $indexName)
+            ->exists();
+
+        if ($exists) {
+            DB::statement(sprintf('ALTER TABLE `%s` DROP INDEX `%s`', $table, $indexName));
+        }
     }
 };
