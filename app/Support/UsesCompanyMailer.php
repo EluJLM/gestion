@@ -12,7 +12,11 @@ trait UsesCompanyMailer
 {
     protected function sendCompanyAwareMail(string $to, Mailable $mailable): void
     {
-        $mailSetting = MailSetting::query()->first();
+        $companyId = auth()->user()?->company_id;
+
+        $mailSetting = MailSetting::query()
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
+            ->first();
 
         if ($mailSetting) {
             $this->applyCompanyMailer($mailSetting);

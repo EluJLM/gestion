@@ -18,6 +18,7 @@ class Ticket extends Model
     public const STATUS_CLOSED = 'closed';
 
     protected $fillable = [
+        'company_id',
         'client_id',
         'title',
         'description',
@@ -54,6 +55,11 @@ class Ticket extends Model
             self::STATUS_RESOLVED,
             self::STATUS_CLOSED,
         ];
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     public function client(): BelongsTo

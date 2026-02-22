@@ -60,21 +60,36 @@ function SettingsIcon() {
 }
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
+    const { user } = usePage().props.auth;
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const navItems = useMemo(
-        () => [
+
+    const navItems = useMemo(() => {
+        if (user?.role === 'super_admin') {
+            return [
+                { label: 'Suscripciones', href: route('super-admin.subscriptions.index'), active: route().current('super-admin.subscriptions.*'), icon: <SettingsIcon /> },
+                { label: 'Mi perfil', href: route('profile.edit'), active: route().current('profile.*'), icon: <ProfileIcon /> },
+            ];
+        }
+
+        const items = [
             { label: 'Dashboard', href: route('dashboard'), active: route().current('dashboard'), icon: <HomeIcon /> },
             { label: 'Servicios registrados', href: route('tickets.index'), active: route().current('tickets.index'), icon: <ListIcon /> },
             { label: 'Crear servicio', href: route('tickets.create'), active: route().current('tickets.create'), icon: <PlusIcon /> },
             { label: 'Clientes', href: route('clients.index'), active: route().current('clients.*'), icon: <UserIcon /> },
-            { label: 'Mi perfil', href: route('profile.edit'), active: route().current('profile.*'), icon: <ProfileIcon /> },
-            { label: 'Configuración', href: route('configuracion.edit'), active: route().current('configuracion.*'), icon: <SettingsIcon /> },
-        ],
-        [],
-    );
+        ];
 
+        if (user?.role === 'tenant_admin') {
+            items.push(
+                { label: 'Empleados', href: route('employees.index'), active: route().current('employees.*'), icon: <UserIcon /> },
+                { label: 'Configuración', href: route('configuracion.edit'), active: route().current('configuracion.*'), icon: <SettingsIcon /> },
+            );
+        }
+
+        items.push({ label: 'Mi perfil', href: route('profile.edit'), active: route().current('profile.*'), icon: <ProfileIcon /> });
+
+        return items;
+    }, [user]);
     const SidebarContent = (
         <div className="flex h-full flex-col">
             <div className="border-b border-gray-200 px-5 py-5">

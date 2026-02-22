@@ -15,10 +15,11 @@ class ClientController extends Controller
 {
     use UsesCompanyMailer;
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         return Inertia::render('Clients/Index', [
             'clients' => Client::query()
+                ->where('company_id', $request->user()->company_id)
                 ->latest()
                 ->get(),
             'documentTypes' => ['CC', 'CE', 'NIT', 'PASAPORTE'],
@@ -33,11 +34,9 @@ class ClientController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate($this->rules());
-        $validated['phone'] = $this->buildFullPhone(
-            $validated['phone_country_code'],
-            $validated['phone'],
-        );
+        $validated = $request->validate($this->rules(companyId: $request->user()->company_id));
+        $validated['phone'] = $this->buildFullPhone($validated['phone_country_code'], $validated['phone']);
+        $validated['company_id'] = $request->user()->company_id;
 
         unset($validated['phone_country_code']);
 
@@ -50,12 +49,10 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client)
     {
-        $validated = $request->validate($this->rules($client->id));
-        $validated['phone'] = $this->buildFullPhone(
-            $validated['phone_country_code'],
-            $validated['phone'],
-        );
+        abort_unless($client->company_id === $request->user()->company_id, 403);
 
+        $validated = $request->validate($this->rules($client->id, $request->user()->company_id));
+        $validated['phone'] = $this->buildFullPhone($validated['phone_country_code'], $validated['phone']);
         unset($validated['phone_country_code']);
 
         $client->update($validated);
@@ -68,6 +65,7 @@ class ClientController extends Controller
         $query = trim((string) $request->query('query', ''));
 
         $clients = Client::query()
+            ->where('company_id', $request->user()->company_id)
             ->when($query !== '', function ($builder) use ($query) {
                 $builder->where(function ($subQuery) use ($query) {
                     $subQuery->where('name', 'like', "%{$query}%")
@@ -78,22 +76,12 @@ class ClientController extends Controller
             })
             ->latest()
             ->limit(10)
-            ->get([
-                'id',
-                'name',
-                'email',
-                'document_type',
-                'document_number',
-                'phone',
-                'address',
-            ]);
+            ->get(['id', 'name', 'email', 'document_type', 'document_number', 'phone', 'address']);
 
-        return response()->json([
-            'clients' => $clients,
-        ]);
+        return response()->json(['clients' => $clients]);
     }
 
-    private function rules(?int $clientId = null): array
+    private function rules(?int $clientId = null, ?int $companyId = null): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -105,7 +93,9 @@ class ClientController extends Controller
                 'max:60',
                 Rule::unique('clients', 'document_number')
                     ->ignore($clientId)
-                    ->where(fn ($query) => $query->where('document_type', request('document_type'))),
+                    ->where(fn ($query) => $query
+                        ->where('company_id', $companyId)
+                        ->where('document_type', request('document_type'))),
             ],
             'phone_country_code' => ['required', 'regex:/^\+[0-9]{1,4}$/'],
             'phone' => ['required', 'regex:/^[0-9]{7,15}$/'],

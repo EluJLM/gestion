@@ -53,6 +53,7 @@ class TicketController extends Controller
         };
 
         $tickets = Ticket::query()
+            ->where('company_id', $request->user()->company_id)
             ->with(['client', 'images'])
             ->whereBetween('service_date', [$startDate->toDateString(), $endDate->toDateString()])
             ->whereIn('status', $statusFilters)
@@ -106,6 +107,7 @@ class TicketController extends Controller
         $validated = $request->validated();
 
         $ticket = Ticket::create([
+            'company_id' => $request->user()->company_id,
             'client_id' => $validated['client_id'],
             'title' => $validated['title'],
             'description' => $validated['description'],
@@ -141,6 +143,8 @@ class TicketController extends Controller
     public function updateStatus(UpdateTicketStatusRequest $request, Ticket $ticket)
     {
         $newStatus = $request->validated('status');
+
+        abort_unless($ticket->company_id === $request->user()->company_id, 403);
 
         $ticket->update([
             'status' => $newStatus,
