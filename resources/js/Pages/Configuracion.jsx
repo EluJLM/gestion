@@ -9,6 +9,7 @@ import { useState } from 'react';
 const smtpProviders = {
     gmail: { host: 'smtp.gmail.com', port: 587, encryption: 'tls' },
     outlook: { host: 'smtp.office365.com', port: 587, encryption: 'tls' },
+    hotmail: { host: 'smtp.office365.com', port: 587, encryption: 'tls' },
     zoho: { host: 'smtp.zoho.com', port: 587, encryption: 'tls' },
     sendgrid: { host: 'smtp.sendgrid.net', port: 587, encryption: 'tls' },
     mailgun: { host: 'smtp.mailgun.org', port: 587, encryption: 'tls' },
@@ -340,6 +341,7 @@ export default function Configuracion({
                                     <option value="">Selecciona un proveedor</option>
                                     <option value="gmail">Gmail / Google Workspace</option>
                                     <option value="outlook">Outlook / Microsoft 365</option>
+                                    <option value="hotmail">Hotmail</option>
                                     <option value="zoho">Zoho Mail</option>
                                     <option value="sendgrid">SendGrid</option>
                                     <option value="mailgun">Mailgun</option>
