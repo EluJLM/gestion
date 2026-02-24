@@ -12,7 +12,8 @@ trait UsesCompanyMailer
 {
     protected function sendCompanyAwareMail(string $to, Mailable $mailable): void
     {
-        $companyId = auth()->user()?->company_id;
+        $company = auth()->user()?->company;
+        $companyId = $company?->id;
 
         $mailSetting = MailSetting::query()
             ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
@@ -25,6 +26,12 @@ trait UsesCompanyMailer
                 ->to($to)
                 ->send($mailable->from($mailSetting->mail_from_address, $mailSetting->mail_from_name));
 
+            return;
+        }
+
+        $canUseSystemMailer = ! $company || filled($company->email) || $company->allow_system_mail_fallback;
+
+        if (! $canUseSystemMailer) {
             return;
         }
 

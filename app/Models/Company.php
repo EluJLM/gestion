@@ -26,6 +26,7 @@ class Company extends Model
         'phone',
         'whatsapp',
         'email',
+        'allow_system_mail_fallback',
         'tax_regime',
         'logo_path',
         'subscription_status',
@@ -38,6 +39,7 @@ class Company extends Model
         'trial_ends_at' => 'datetime',
         'subscription_ends_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'allow_system_mail_fallback' => 'boolean',
     ];
 
     public function users(): HasMany

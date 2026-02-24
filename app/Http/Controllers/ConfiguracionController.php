@@ -69,10 +69,13 @@ class ConfiguracionController extends Controller
             'country' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'string', 'max:50'],
             'whatsapp' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'allow_system_mail_fallback' => ['required', 'boolean'],
             'tax_regime' => ['required', Rule::in(self::TAX_REGIMES)],
             'logo_path' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $validated['email'] = filled($validated['email'] ?? null) ? $validated['email'] : null;
 
         $company = Company::query()->find($request->user()->company_id);
 

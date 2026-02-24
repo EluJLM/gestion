@@ -372,7 +372,7 @@ export default function TicketsCreate({ statuses }) {
                                 window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
                             }}
                         >
-                            Abrir en otra pestaña
+                            Enviar a WhatsApp
                         </PrimaryButton>
                     </div>
                 </div>

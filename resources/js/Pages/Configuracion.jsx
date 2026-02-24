@@ -43,6 +43,7 @@ export default function Configuracion({
         email: company?.email ?? '',
         tax_regime: company?.tax_regime ?? taxRegimes[0] ?? '',
         logo_path: company?.logo_path ?? '',
+        allow_system_mail_fallback: company?.allow_system_mail_fallback ?? true,
     });
 
     const mailForm = useForm({
@@ -191,7 +192,7 @@ export default function Configuracion({
                                 <InputError className="mt-1" message={companyForm.errors.tax_regime} />
                             </div>
                             <div>
-                                <InputLabel htmlFor="email" value="Email" />
+                                <InputLabel htmlFor="email" value="Email (opcional)" />
                                 <TextInput
                                     id="email"
                                     type="email"
@@ -201,7 +202,26 @@ export default function Configuracion({
                                         companyForm.setData('email', e.target.value)
                                     }
                                 />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Si no registras correo propio, puedes decidir abajo si usar el correo del sistema.
+                                </p>
                                 <InputError className="mt-1" message={companyForm.errors.email} />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="inline-flex items-start gap-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        className="mt-0.5 rounded border-gray-300 text-indigo-600"
+                                        checked={companyForm.data.allow_system_mail_fallback}
+                                        onChange={(e) =>
+                                            companyForm.setData('allow_system_mail_fallback', e.target.checked)
+                                        }
+                                    />
+                                    <span>
+                                        Usar correo del sistema cuando no tenga correo registrado ni SMTP propio.
+                                    </span>
+                                </label>
+                                <InputError className="mt-1" message={companyForm.errors.allow_system_mail_fallback} />
                             </div>
                             <div>
                                 <InputLabel htmlFor="phone" value="Teléfono" />
@@ -301,6 +321,12 @@ export default function Configuracion({
                         <h3 className="text-lg font-semibold text-gray-900">
                             Configuración de Correo
                         </h3>
+
+                        {!companyForm.data.email && (
+                            <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                No tienes un correo de empresa registrado. Regístralo para mayor trazabilidad o elige si deseas usar el correo del sistema.
+                            </div>
+                        )}
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="md:col-span-2">

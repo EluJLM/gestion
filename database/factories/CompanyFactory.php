@@ -26,6 +26,7 @@ class CompanyFactory extends Factory
             'phone' => fake()->numerify('3#########'),
             'whatsapp' => fake()->numerify('3#########'),
             'email' => fake()->unique()->companyEmail(),
+            'allow_system_mail_fallback' => true,
             'tax_regime' => 'Responsable de IVA',
             'subscription_status' => Company::STATUS_ACTIVE,
             'trial_ends_at' => now()->addDays(15),
