@@ -49,6 +49,18 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+
+        if ($user && ! $user->isSuperAdmin() && (! $user->company || ! $user->company->hasActiveSubscription())) {
+            Auth::logout();
+
+            RateLimiter::clear($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Por favor comunícate con el asesor.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

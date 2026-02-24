@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureSubscriptionActive
@@ -16,7 +17,14 @@ class EnsureSubscriptionActive
             return $next($request);
         }
 
-        abort_unless($user->company && $user->company->hasActiveSubscription(), 402, 'Tu suscripción está vencida o cancelada.');
+        if (! $user->company || ! $user->company->hasActiveSubscription()) {
+            Auth::guard('web')->logout();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login');
+        }
 
         return $next($request);
     }
