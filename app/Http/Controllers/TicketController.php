@@ -54,7 +54,7 @@ class TicketController extends Controller
 
         $tickets = Ticket::query()
             ->where('company_id', $request->user()->company_id)
-            ->with(['client', 'images'])
+            ->with(['client', 'images', 'creator:id,name'])
             ->whereBetween('service_date', [$startDate->toDateString(), $endDate->toDateString()])
             ->whereIn('status', $statusFilters)
             ->when($document !== '', function ($query) use ($document) {
@@ -109,6 +109,7 @@ class TicketController extends Controller
         $ticket = Ticket::create([
             'company_id' => $request->user()->company_id,
             'client_id' => $validated['client_id'],
+            'created_by' => $request->user()->id,
             'title' => $validated['title'],
             'description' => $validated['description'],
             'type' => $validated['type'],
@@ -157,7 +158,7 @@ class TicketController extends Controller
     public function publicShow(string $token)
     {
         $ticket = Ticket::query()
-            ->with(['client', 'images'])
+            ->with(['client', 'images', 'creator:id,name'])
             ->where('public_token', $token)
             ->firstOrFail();
 

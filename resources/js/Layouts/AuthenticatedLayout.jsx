@@ -60,7 +60,7 @@ function SettingsIcon() {
 }
 
 export default function AuthenticatedLayout({ header, children }) {
-    const { user } = usePage().props.auth;
+    const { user, company } = usePage().props.auth;
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
 
@@ -95,7 +95,7 @@ export default function AuthenticatedLayout({ header, children }) {
             <div className="border-b border-gray-200 px-5 py-5">
                 <Link href="/" className="flex items-center gap-3 text-gray-800">
                     <ApplicationLogo className="h-9 w-auto fill-current text-gray-800" />
-                    <span className="text-2xl font-semibold">Panel</span>
+                    <span className="text-2xl font-semibold">Gestión</span>
                 </Link>
             </div>
 
@@ -120,6 +120,9 @@ export default function AuthenticatedLayout({ header, children }) {
             <div className="border-t border-gray-200 p-4">
                 <p className="mb-2 text-sm font-semibold text-gray-800">{user.name}</p>
                 <p className="mb-3 text-xs text-gray-500">{user.email}</p>
+                {company?.business_name && (
+                    <p className="mb-3 text-xs font-medium text-gray-600">{company.business_name}</p>
+                )}
                 <Link
                     href={route('logout')}
                     method="post"

@@ -19,6 +19,7 @@ class Ticket extends Model
 
     protected $fillable = [
         'company_id',
+        'created_by',
         'client_id',
         'title',
         'description',
@@ -65,6 +66,11 @@ class Ticket extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function images(): HasMany

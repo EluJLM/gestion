@@ -232,6 +232,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                                         <p><strong>Precio:</strong> {ticket.estimated_price ?? 'N/A'}</p>
                                         <p><strong>Fecha servicio:</strong> {formatDate(ticket.service_date)}</p>
                                         <p><strong>Creación:</strong> {formatDate(ticket.created_at)}</p>
+                                        <p><strong>Creado por:</strong> {ticket.creator?.name ?? 'No disponible'}</p>
                                         <p><strong>Cierre:</strong> {formatDate(ticket.closed_at)}</p>
                                         <p><strong>Imágenes:</strong> {ticket.images?.length ?? 0}</p>
                                         <div>
@@ -309,7 +310,10 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                                                 <p className="text-gray-500">Servicio: {formatDate(ticket.service_date)}</p>
                                             </td>
                                             <td className="px-2 py-3 text-gray-700">{ticket.type}</td>
-                                            <td className="px-2 py-3 text-gray-700">{formatDate(ticket.created_at)}</td>
+                                            <td className="px-2 py-3 text-gray-700">
+                                                <p>{formatDate(ticket.created_at)}</p>
+                                                <p className="text-xs text-gray-500">{ticket.creator?.name ?? 'No disponible'}</p>
+                                            </td>
                                             <td className="px-2 py-3 text-gray-700">{formatDate(ticket.closed_at)}</td>
                                             <td className="px-2 py-3 text-gray-700">{ticket.images?.length ?? 0}</td>
                                             <td className="px-2 py-3">

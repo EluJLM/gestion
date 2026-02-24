@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 
 export default function EmployeesIndex({ employees }) {
     const form = useForm({ name: '', email: '', password: '' });
@@ -7,6 +7,12 @@ export default function EmployeesIndex({ employees }) {
     const submit = (e) => {
         e.preventDefault();
         form.post(route('employees.store'), { onSuccess: () => form.reset('name', 'email', 'password') });
+    };
+
+    const toggleEmployeeStatus = (employee) => {
+        router.patch(route('employees.status.update', employee.id), {
+            is_active: !employee.is_active,
+        });
     };
 
     return (
@@ -26,10 +32,17 @@ export default function EmployeesIndex({ employees }) {
                             <div>
                                 <p className="text-sm font-semibold">{employee.name}</p>
                                 <p className="text-xs text-gray-500">{employee.email}</p>
+                                <p className={`text-xs ${employee.is_active ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                    {employee.is_active ? 'Activo' : 'Inactivo'}
+                                </p>
                             </div>
-                            <form method="post" onSubmit={(e) => { e.preventDefault(); form.delete(route('employees.destroy', employee.id)); }}>
-                                <button className="text-xs text-red-600">Eliminar</button>
-                            </form>
+                            <button
+                                type="button"
+                                onClick={() => toggleEmployeeStatus(employee)}
+                                className="text-xs text-indigo-600"
+                            >
+                                {employee.is_active ? 'Desactivar' : 'Activar'}
+                            </button>
                         </div>
                     ))}
                 </div>

@@ -43,6 +43,7 @@ class TicketManagementTest extends TestCase
             'status' => Ticket::STATUS_CLOSED,
             'service_date' => now()->toDateString(),
             'client_id' => $client->id,
+            'created_by' => $user->id,
             'images' => [
                 UploadedFile::fake()->image('equipo.jpg'),
             ],
@@ -62,6 +63,7 @@ class TicketManagementTest extends TestCase
             'status' => Ticket::STATUS_CLOSED,
             'service_date' => now()->toDateString(),
             'client_id' => $client->id,
+            'created_by' => $user->id,
         ]);
 
         $this->assertDatabaseCount('ticket_images', 1);
@@ -183,6 +185,24 @@ class TicketManagementTest extends TestCase
         $ticket->refresh();
 
         $this->assertNotNull($ticket->public_token);
+    }
+
+
+    public function test_inactive_user_cannot_authenticate(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'inactive@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => false,
+        ]);
+
+        $response = $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
     }
 
     public function test_public_ticket_link_displays_ticket_without_authentication(): void

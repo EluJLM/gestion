@@ -97,7 +97,7 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
 
         Route::get('/empleados', [EmployeeController::class, 'index'])->name('employees.index');
         Route::post('/empleados', [EmployeeController::class, 'store'])->name('employees.store');
-        Route::delete('/empleados/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+        Route::patch('/empleados/{employee}/estado', [EmployeeController::class, 'updateStatus'])->name('employees.status.update');
     });
 });
 

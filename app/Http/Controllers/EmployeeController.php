@@ -19,7 +19,7 @@ class EmployeeController extends Controller
                 ->where('company_id', $request->user()->company_id)
                 ->where('role', User::ROLE_EMPLOYEE)
                 ->latest()
-                ->get(['id', 'name', 'email', 'created_at']),
+                ->get(['id', 'name', 'email', 'is_active', 'created_at']),
         ]);
     }
 
@@ -47,14 +47,20 @@ class EmployeeController extends Controller
         return back();
     }
 
-    public function destroy(Request $request, User $employee): RedirectResponse
+    public function updateStatus(Request $request, User $employee): RedirectResponse
     {
         abort_unless(
             $employee->company_id === $request->user()->company_id && $employee->role === User::ROLE_EMPLOYEE,
             403,
         );
 
-        $employee->delete();
+        $validated = $request->validate([
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $employee->update([
+            'is_active' => $validated['is_active'],
+        ]);
 
         return back();
     }
