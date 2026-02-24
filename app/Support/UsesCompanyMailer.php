@@ -29,7 +29,7 @@ trait UsesCompanyMailer
             return;
         }
 
-        $canUseSystemMailer = ! $company || filled($company->email) || $company->allow_system_mail_fallback;
+        $canUseSystemMailer = ! $company || (bool) $company->allow_system_mail_fallback;
 
         if (! $canUseSystemMailer) {
             return;

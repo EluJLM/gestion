@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\ClientWelcomeMail;
 use App\Models\Client;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -39,6 +40,35 @@ class ClientManagementTest extends TestCase
         ]);
 
         Mail::assertSent(ClientWelcomeMail::class);
+    }
+
+
+    public function test_does_not_send_saas_mail_when_fallback_is_disabled_and_no_smtp(): void
+    {
+        $company = Company::factory()->create([
+            'email' => null,
+            'allow_system_mail_fallback' => false,
+        ]);
+
+        $user = User::factory()->create([
+            'company_id' => $company->id,
+            'role' => User::ROLE_TENANT_ADMIN,
+        ]);
+
+        Mail::fake();
+
+        $response = $this->actingAs($user)->post(route('clients.store'), [
+            'name' => 'Cliente sin fallback',
+            'email' => 'sinfallback@example.com',
+            'document_type' => 'CC',
+            'document_number' => '99887766',
+            'phone_country_code' => '+57',
+            'phone' => '3001112233',
+            'address' => 'Calle 1 # 2-3',
+        ]);
+
+        $response->assertRedirect(route('clients.index'));
+        Mail::assertNothingSent();
     }
 
     public function test_authenticated_user_can_update_client(): void
