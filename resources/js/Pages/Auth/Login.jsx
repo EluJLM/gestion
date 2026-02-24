@@ -1,17 +1,29 @@
 import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
+import Modal from '@/Components/Modal';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 export default function Login({ status, canResetPassword }) {
+    const [showAdvisorModal, setShowAdvisorModal] = useState(false);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
         remember: false,
     });
+
+    const advisorMessage = 'Por favor comunícate con el asesor.';
+
+    useEffect(() => {
+        if (errors.email === advisorMessage) {
+            setShowAdvisorModal(true);
+        }
+    }, [errors.email]);
 
     const submit = (e) => {
         e.preventDefault();
@@ -46,7 +58,10 @@ export default function Login({ status, canResetPassword }) {
                         onChange={(e) => setData('email', e.target.value)}
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError
+                        message={errors.email === advisorMessage ? null : errors.email}
+                        className="mt-2"
+                    />
                 </div>
 
                 <div className="mt-4">
@@ -95,6 +110,28 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
             </form>
+
+            <Modal
+                show={showAdvisorModal}
+                onClose={() => setShowAdvisorModal(false)}
+                maxWidth="md"
+            >
+                <div className="p-6">
+                    <h2 className="text-lg font-medium text-gray-900">
+                        Acceso restringido
+                    </h2>
+                    <p className="mt-3 text-sm text-gray-600">{advisorMessage}</p>
+
+                    <div className="mt-6 flex justify-end">
+                        <PrimaryButton
+                            type="button"
+                            onClick={() => setShowAdvisorModal(false)}
+                        >
+                            Entendido
+                        </PrimaryButton>
+                    </div>
+                </div>
+            </Modal>
         </GuestLayout>
     );
 }
