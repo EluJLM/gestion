@@ -51,6 +51,13 @@ export default function Welcome({ auth }) {
                         </p>
 
                         <p className="text-base leading-relaxed text-gray-600 dark:text-gray-300">
+                            También puedes configurar notificaciones para tus
+                            clientes por correo electrónico y por WhatsApp,
+                            incluyendo un enlace que les permite validar el
+                            servicio de forma rápida y segura.
+                        </p>
+
+                        <p className="text-base leading-relaxed text-gray-600 dark:text-gray-300">
                             Si creas tu cuenta ahora, tu primer mes es
                             completamente gratis para que puedas probar todas
                             las funciones sin compromiso.
