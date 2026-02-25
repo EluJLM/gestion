@@ -1,0 +1,161 @@
+[33mcommit 9a6d762144ba243dd62f3541533c29ef008b5341[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcodex/implementar-modelo-saas-con-dashboard-de-suscripciones[m[33m, [m[1;31morigin/codex/implementar-modelo-saas-con-dashboard-de-suscripciones[m[33m)[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Sun Feb 22 10:22:19 2026 -0500
+
+    Corrige migración SaaS para índices únicos existentes en clients
+
+[33mcommit 6a209aca24ac2604cd042f42a8b919acfe1a8864[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Sun Feb 22 10:16:21 2026 -0500
+
+    Implementa base SaaS multi-tenant con suscripciones y gestión de empleados
+
+[33mcommit f4d588977a10882c7fac7cb4a3fab8a12563f225[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Fri Feb 20 21:52:57 2026 -0500
+
+    actualizando el despiege 3
+
+[33mcommit 0dd339ade4dca01e66115ca66128fc1b4b1e49e3[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Fri Feb 20 21:43:38 2026 -0500
+
+    actualizando el despiege 2
+
+[33mcommit 48062a6b873eba82973623ad7fcbe7e78eeb1336[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Fri Feb 20 21:28:06 2026 -0500
+
+    actualizando el despiege
+
+[33mcommit efa78d979dfcf6812ab2020ea9b660664260d58c[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Fri Feb 20 14:51:13 2026 -0500
+
+    Improve dashboard mobile responsiveness and prevent overflow
+
+[33mcommit 89ef360b682e6bfa33e3218e7d7036e27a2911ff[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Fri Feb 20 14:46:12 2026 -0500
+
+    Fix missing public token when building ticket public links
+
+[33mcommit c2cb0492d2a253e1d07bde935048f00e19d2d90c[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Fri Feb 20 14:39:18 2026 -0500
+
+    Add selected image previews and verification gallery layout
+
+[33mcommit 0ba0d116f2f07f008eb86b0e1e8c763206187a00[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Fri Feb 20 14:23:18 2026 -0500
+
+    Add day/week/month/year range filter for tickets search
+
+[33mcommit 8ccdd972585eb8cd8b9d5f08d246084322fd639c[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Fri Feb 20 14:15:55 2026 -0500
+
+    Add status bool filters and richer WhatsApp message formatting
+
+[33mcommit d99ef0d696fd8fd00e29390d0a760d26fe87bf6b[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Fri Feb 20 12:27:19 2026 -0500
+
+    Add scheduled service date logic and dashboard metrics chart
+
+[33mcommit 1478de01f8a078d6d5160fcd2168a705664fe099[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Fri Feb 20 11:58:14 2026 -0500
+
+    Improve phone validation and ticket list WhatsApp resend tools
+
+[33mcommit 09653dcf4083373c7bfc03265a5331fea0f6e691[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Fri Feb 20 11:38:38 2026 -0500
+
+    Add WhatsApp link workflow after ticket creation
+
+[33mcommit a1cdcb7f69a2286ab1390c363001c5b7054cf407[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Fri Feb 20 07:54:22 2026 -0500
+
+    solucion con docker para el despliege 3
+
+[33mcommit b0a9ccedb8514fc8d621df77fdd4fe410e70fe3e[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Fri Feb 20 07:46:02 2026 -0500
+
+    solucion con docker para el despliege 2
+
+[33mcommit 8d7fd5c635e70398e7de276a9b52df19c23de878[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Fri Feb 20 07:42:40 2026 -0500
+
+    solucion con docker para el despliege
+
+[33mcommit 577e858254435cd5b7f46a34aa3e4f7b8082b86a[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Wed Feb 18 22:52:08 2026 -0500
+
+    Restaurar acceso a configuración de usuario en sidebar
+
+[33mcommit 683cd68ddd75efd313853575583388ddde936b1b[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Wed Feb 18 17:48:45 2026 -0500
+
+    mirando el react
+
+[33mcommit 08e476d026e7bab8e5f25781b24a97f87f3b8b00[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Wed Feb 18 06:22:16 2026 -0500
+
+    Fix https cloudflare
+
+[33mcommit f5c582a33684409a5f2e99630d7987d4f68f19e2[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Wed Feb 18 04:16:09 2026 -0500
+
+    feat: separar correo del SaaS (.env) del correo de empresa
+
+[33mcommit 821362c5eda0161f37834615b67efacbf1723912[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Wed Feb 18 04:01:24 2026 -0500
+
+    feat: ampliar proveedores sugeridos SMTP
+
+[33mcommit 67b7e9eb77a8d9687fd5d237762531d5c3f3df19[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Wed Feb 18 03:47:54 2026 -0500
+
+    feat: convertir campos de configuración a selects para Colombia
+
+[33mcommit b6fc0525f09202ff6827fd65cfa9aeeaf8dacd67[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Wed Feb 18 03:29:28 2026 -0500
+
+    feat: agregar vista de configuración de empresa y SMTP
+
+[33mcommit 1959d14f3d278fe6ead18898f5ff3e371492f08e[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Wed Feb 18 02:58:32 2026 -0500
+
+    Agregar búsqueda de clientes previos al crear tickets
+
+[33mcommit 078e1d796748f7fb1b93702637c1abe3a28ff202[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Wed Feb 18 02:50:38 2026 -0500
+
+    Separar creación y listado de tickets en vistas distintas
+
+[33mcommit 38433a0e0a0038a459b7e92c1a81775726161bef[m
+Author: ELU LOZANO <78881894+EluJLM@users.noreply.github.com>
+Date:   Wed Feb 18 01:52:06 2026 -0500
+
+    Send ticket email with public link and add document type
+
+[33mcommit 9d037d9dd1f33a7ee140a3c3fbca2b342f64f20b[m
+Author: EluJLM <elulozano92@gmail.com>
+Date:   Tue Feb 17 18:24:31 2026 -0500
+
+    primer commit

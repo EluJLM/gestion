@@ -207,22 +207,7 @@ export default function Configuracion({
                                 </p>
                                 <InputError className="mt-1" message={companyForm.errors.email} />
                             </div>
-                            <div className="md:col-span-2">
-                                <label className="inline-flex items-start gap-2 text-sm text-gray-700">
-                                    <input
-                                        type="checkbox"
-                                        className="mt-0.5 rounded border-gray-300 text-indigo-600"
-                                        checked={companyForm.data.allow_system_mail_fallback}
-                                        onChange={(e) =>
-                                            companyForm.setData('allow_system_mail_fallback', e.target.checked)
-                                        }
-                                    />
-                                    <span>
-                                        Usar correo del sistema cuando no tenga correo registrado ni SMTP propio.
-                                    </span>
-                                </label>
-                                <InputError className="mt-1" message={companyForm.errors.allow_system_mail_fallback} />
-                            </div>
+                            
                             <div>
                                 <InputLabel htmlFor="phone" value="Teléfono" />
                                 <TextInput
@@ -327,6 +312,22 @@ export default function Configuracion({
                                 No tienes un correo de empresa registrado. Regístralo para mayor trazabilidad o elige si deseas usar el correo del sistema.
                             </div>
                         )}
+                        <div className="md:col-span-2">
+                                <label className="inline-flex items-start gap-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        className="mt-0.5 rounded border-gray-300 text-indigo-600"
+                                        checked={companyForm.data.allow_system_mail_fallback}
+                                        onChange={(e) =>
+                                            companyForm.setData('allow_system_mail_fallback', e.target.checked)
+                                        }
+                                    />
+                                    <span>
+                                        Usar correo del sistema cuando no tenga correo registrado ni SMTP propio.
+                                    </span>
+                                </label>
+                                <InputError className="mt-1" message={companyForm.errors.allow_system_mail_fallback} />
+                            </div>
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="md:col-span-2">
