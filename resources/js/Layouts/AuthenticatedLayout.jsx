@@ -73,7 +73,7 @@ export default function AuthenticatedLayout({ header, children }) {
         }
 
         const items = [
-            { label: 'Dashboard', href: route('dashboard'), active: route().current('dashboard'), icon: <HomeIcon /> },
+            { label: 'Inicio', href: route('dashboard'), active: route().current('dashboard'), icon: <HomeIcon /> },
             { label: 'Servicios registrados', href: route('tickets.index'), active: route().current('tickets.index'), icon: <ListIcon /> },
             { label: 'Crear servicio', href: route('tickets.create'), active: route().current('tickets.create'), icon: <PlusIcon /> },
             { label: 'Clientes', href: route('clients.index'), active: route().current('clients.*'), icon: <UserIcon /> },

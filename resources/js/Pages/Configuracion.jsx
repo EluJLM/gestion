@@ -192,7 +192,7 @@ export default function Configuracion({
                                 <InputError className="mt-1" message={companyForm.errors.tax_regime} />
                             </div>
                             <div>
-                                <InputLabel htmlFor="email" value="Email (opcional)" />
+                                <InputLabel htmlFor="email" value="Correo electrónico (opcional)" />
                                 <TextInput
                                     id="email"
                                     type="email"
@@ -344,7 +344,7 @@ export default function Configuracion({
                                     <option value="zoho">Zoho Mail</option>
                                     <option value="sendgrid">SendGrid</option>
                                     <option value="mailgun">Mailgun</option>
-                                    <option value="hostinger">Hostinger Email</option>
+                                    <option value="hostinger">Correo de Hostinger</option>
                                     <option value="brevo">Brevo (Sendinblue)</option>
                                     <option value="amazonSes">Amazon SES</option>
                                     <option value="protonMail">Proton Mail</option>
@@ -490,7 +490,7 @@ export default function Configuracion({
                             Probar envío de correo
                         </h3>
                         <div className="max-w-lg">
-                            <InputLabel htmlFor="test_email" value="Email destino" />
+                            <InputLabel htmlFor="test_email" value="Correo de destino" />
                             <TextInput
                                 id="test_email"
                                 type="email"

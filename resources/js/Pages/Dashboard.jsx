@@ -16,11 +16,11 @@ export default function Dashboard({ pendingTickets, monthlyMetrics, closedServic
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
+                    Inicio
                 </h2>
             }
         >
-            <Head title="Dashboard" />
+            <Head title="Inicio" />
 
             <div className="py-10">
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
