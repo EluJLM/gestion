@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->index(['company_id', 'employee_id', 'starts_at']);
+            $table->index(['company_id', 'employee_id', 'starts_at'], 'pcp_company_employee_starts_idx');
         });
     }
 
