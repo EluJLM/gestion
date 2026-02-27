@@ -77,6 +77,7 @@ export default function AuthenticatedLayout({ header, children }) {
             { label: 'Servicios registrados', href: route('tickets.index'), active: route().current('tickets.index'), icon: <ListIcon /> },
             { label: 'Crear servicio', href: route('tickets.create'), active: route().current('tickets.create'), icon: <PlusIcon /> },
             { label: 'Clientes', href: route('clients.index'), active: route().current('clients.*'), icon: <UserIcon /> },
+            { label: 'Productos', href: route('products.index'), active: route().current('products.*'), icon: <ListIcon /> },
         ];
 
         if (user?.role === 'tenant_admin') {

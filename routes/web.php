@@ -3,6 +3,8 @@
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductPermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\TicketController;
@@ -85,6 +87,9 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
     Route::patch('/clientes/{client}', [ClientController::class, 'update'])->name('clients.update');
     Route::get('/clientes/buscar', [ClientController::class, 'search'])->name('clients.search');
 
+    Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/productos', [ProductController::class, 'store'])->name('products.store');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -98,6 +103,7 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
         Route::get('/empleados', [EmployeeController::class, 'index'])->name('employees.index');
         Route::post('/empleados', [EmployeeController::class, 'store'])->name('employees.store');
         Route::patch('/empleados/{employee}/estado', [EmployeeController::class, 'updateStatus'])->name('employees.status.update');
+        Route::post('/empleados/permisos-producto', [ProductPermissionController::class, 'store'])->name('employees.product-permissions.store');
     });
 });
 

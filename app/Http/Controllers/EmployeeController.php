@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\ProductCreationPermission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -20,6 +21,12 @@ class EmployeeController extends Controller
                 ->where('role', User::ROLE_EMPLOYEE)
                 ->latest()
                 ->get(['id', 'name', 'email', 'is_active', 'created_at']),
+            'productPermissions' => ProductCreationPermission::query()
+                ->where('company_id', $request->user()->company_id)
+                ->with(['employee:id,name', 'grantedBy:id,name'])
+                ->latest()
+                ->limit(30)
+                ->get(['id', 'employee_id', 'granted_by', 'allow_without_invoice', 'starts_at', 'ends_at', 'notes']),
         ]);
     }
 
