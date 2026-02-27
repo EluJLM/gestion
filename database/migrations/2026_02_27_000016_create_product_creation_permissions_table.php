@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index(['company_id', 'employee_id', 'is_active']);
+            $table->index(['company_id', 'employee_id', 'is_active'], 'pcp_company_employee_active_idx');
         });
     }
 
