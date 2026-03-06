@@ -18,7 +18,6 @@ class Product extends Model
         'barcode',
         'cost_price',
         'sale_price',
-        'invoice_image_path',
     ];
 
     protected $casts = [

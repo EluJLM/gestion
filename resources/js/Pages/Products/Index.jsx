@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function ProductsIndex({ products, query, canCreateProducts, canCreateWithoutInvoice }) {
+export default function ProductsIndex({ products, query, canCreateProducts }) {
     const form = useForm({
         name: '',
         sku: '',
@@ -10,7 +10,6 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
         generate_barcode: true,
         cost_price: '',
         sale_price: '',
-        invoice_image: null,
     });
     const [editingProduct, setEditingProduct] = useState(null);
     const editForm = useForm({
@@ -19,14 +18,13 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
         barcode: '',
         cost_price: '',
         sale_price: '',
-        invoice_image: null,
     });
 
     const submit = (e) => {
         e.preventDefault();
         form.post(route('products.store'), {
             forceFormData: true,
-            onSuccess: () => form.reset('name', 'sku', 'barcode', 'invoice_image', 'cost_price', 'sale_price'),
+            onSuccess: () => form.reset('name', 'sku', 'barcode', 'cost_price', 'sale_price'),
         });
     };
 
@@ -38,7 +36,6 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
             barcode: product.barcode ?? '',
             cost_price: product.cost_price ?? '',
             sale_price: product.sale_price ?? '',
-            invoice_image: null,
         });
     };
 
@@ -81,9 +78,7 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
                             Generar código automáticamente
                         </label>
                         <div className="md:col-span-2">
-                            <label className="mb-1 block text-xs text-gray-600">Factura (imagen)</label>
-                            <input type="file" accept="image/*" onChange={(e) => form.setData('invoice_image', e.target.files?.[0] ?? null)} />
-                            {canCreateWithoutInvoice && <p className="text-xs text-emerald-700">Tienes permiso para crear productos sin factura.</p>}
+                            <p className="text-xs text-gray-500">Los productos ya no requieren imagen de factura.</p>
                         </div>
                         <button className="md:col-span-2 rounded bg-indigo-600 px-3 py-2 text-sm text-white">Guardar producto</button>
                     </form>
@@ -103,7 +98,6 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
                                     <input className="rounded border" placeholder="Código de barras" value={editForm.data.barcode} onChange={(e) => editForm.setData('barcode', e.target.value)} />
                                     <input className="rounded border" type="number" min="0" step="0.01" placeholder="Valor costo" value={editForm.data.cost_price} onChange={(e) => editForm.setData('cost_price', e.target.value)} />
                                     <input className="rounded border" type="number" min="0" step="0.01" placeholder="Valor venta" value={editForm.data.sale_price} onChange={(e) => editForm.setData('sale_price', e.target.value)} />
-                                    <input className="rounded border p-1" type="file" accept="image/*" onChange={(e) => editForm.setData('invoice_image', e.target.files?.[0] ?? null)} />
                                     <div className="md:col-span-2 flex gap-2">
                                         <button className="rounded bg-indigo-600 px-3 py-2 text-xs text-white">Guardar cambios</button>
                                         <button type="button" className="rounded border px-3 py-2 text-xs" onClick={() => setEditingProduct(null)}>Cancelar</button>
@@ -118,7 +112,6 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
                                     <p>Valor venta: ${Number(product.sale_price ?? 0).toFixed(2)}</p>
                                     <p>Creado por: {product.creator?.name}</p>
                                     <p>Fecha: {new Date(product.created_at).toLocaleString()}</p>
-                                    <p>{product.invoice_image_path ? 'Con factura adjunta' : 'Sin factura adjunta'}</p>
                                     {canCreateProducts && (
                                         <button type="button" className="mt-2 rounded border px-3 py-1 text-xs" onClick={() => startEditing(product)}>
                                             Editar producto
