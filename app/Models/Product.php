@@ -16,7 +16,14 @@ class Product extends Model
         'name',
         'sku',
         'barcode',
+        'cost_price',
+        'sale_price',
         'invoice_image_path',
+    ];
+
+    protected $casts = [
+        'cost_price' => 'decimal:2',
+        'sale_price' => 'decimal:2',
     ];
 
     public function company(): BelongsTo

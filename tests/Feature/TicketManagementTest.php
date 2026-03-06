@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\TicketCreatedMail;
 use App\Models\Client;
+use App\Models\Product;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -69,6 +70,57 @@ class TicketManagementTest extends TestCase
         $this->assertDatabaseCount('ticket_images', 1);
 
         $this->assertNotNull(Ticket::first()?->closed_at);
+    }
+
+    public function test_authenticated_user_can_add_multiple_products_to_ticket(): void
+    {
+        $user = User::factory()->create();
+        $client = Client::factory()->create(['company_id' => $user->company_id]);
+        $productA = Product::create([
+            'company_id' => $user->company_id,
+            'created_by' => $user->id,
+            'name' => 'Filtro',
+            'cost_price' => 10,
+            'sale_price' => 15,
+        ]);
+        $productB = Product::create([
+            'company_id' => $user->company_id,
+            'created_by' => $user->id,
+            'name' => 'Aceite',
+            'cost_price' => 20,
+            'sale_price' => 30,
+        ]);
+
+        Mail::fake();
+
+        $response = $this->actingAs($user)->post(route('tickets.store'), [
+            'title' => 'Mantenimiento',
+            'description' => 'Mantenimiento preventivo.',
+            'type' => 'Taller',
+            'status' => Ticket::STATUS_PENDING,
+            'service_date' => now()->toDateString(),
+            'client_id' => $client->id,
+            'products' => [
+                ['product_id' => $productA->id, 'quantity' => 1, 'unit_price' => 15],
+                ['product_id' => $productB->id, 'quantity' => 2, 'unit_price' => 30],
+            ],
+        ]);
+
+        $response->assertRedirect(route('tickets.create'));
+
+        $ticket = Ticket::query()->firstOrFail();
+        $this->assertDatabaseHas('product_ticket', [
+            'ticket_id' => $ticket->id,
+            'product_id' => $productA->id,
+            'quantity' => 1,
+            'unit_price' => 15,
+        ]);
+        $this->assertDatabaseHas('product_ticket', [
+            'ticket_id' => $ticket->id,
+            'product_id' => $productB->id,
+            'quantity' => 2,
+            'unit_price' => 30,
+        ]);
     }
 
     public function test_authenticated_user_can_update_ticket_status_and_set_closed_at(): void

@@ -89,6 +89,7 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
 
     Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
     Route::post('/productos', [ProductController::class, 'store'])->name('products.store');
+    Route::patch('/productos/{product}', [ProductController::class, 'update'])->name('products.update');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

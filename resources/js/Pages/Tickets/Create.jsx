@@ -17,7 +17,7 @@ const statusLabels = {
 
 const todayString = () => new Date().toISOString().slice(0, 10);
 
-export default function TicketsCreate({ statuses }) {
+export default function TicketsCreate({ statuses, products }) {
     const { props } = usePage();
     const ticketCreatedFlash = props.flash?.ticketCreated;
 
@@ -31,6 +31,7 @@ export default function TicketsCreate({ statuses }) {
         service_date: todayString(),
         client_id: '',
         images: [],
+        products: [],
     });
 
     const [clientQuery, setClientQuery] = useState('');
@@ -135,6 +136,23 @@ export default function TicketsCreate({ statuses }) {
     const handleServiceDateChange = (value) => {
         setData('service_date', value);
         setIsServiceToday(value === todayString());
+    };
+
+    const addProductRow = () => {
+        setData('products', [...(data.products ?? []), { product_id: '', quantity: 1, unit_price: '' }]);
+    };
+
+    const updateProductRow = (index, key, value) => {
+        const currentRows = [...(data.products ?? [])];
+        currentRows[index] = {
+            ...currentRows[index],
+            [key]: value,
+        };
+        setData('products', currentRows);
+    };
+
+    const removeProductRow = (index) => {
+        setData('products', (data.products ?? []).filter((_, rowIndex) => rowIndex !== index));
     };
 
     return (
@@ -299,6 +317,68 @@ export default function TicketsCreate({ statuses }) {
                                     </div>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="space-y-3 rounded-md border border-gray-200 p-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-lg font-semibold text-gray-800">Productos en la factura</h3>
+                                <button type="button" onClick={addProductRow} className="rounded border px-3 py-1 text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                    Agregar producto
+                                </button>
+                            </div>
+
+                            {(data.products ?? []).length === 0 && (
+                                <p className="text-sm text-gray-500">Puedes agregar varios productos en la misma factura.</p>
+                            )}
+
+                            {(data.products ?? []).map((item, index) => (
+                                <div key={`product-row-${index}`} className="grid gap-2 rounded border p-3 md:grid-cols-4">
+                                    <select
+                                        className="rounded border-gray-300 text-sm"
+                                        value={item.product_id}
+                                        onChange={(e) => {
+                                            const selected = products.find((product) => String(product.id) === e.target.value);
+                                            const currentRows = [...(data.products ?? [])];
+                                            currentRows[index] = {
+                                                ...currentRows[index],
+                                                product_id: e.target.value,
+                                                unit_price: item.unit_price || selected?.sale_price || '',
+                                            };
+                                            setData('products', currentRows);
+                                        }}
+                                    >
+                                        <option value="">Selecciona producto</option>
+                                        {products.map((product) => (
+                                            <option key={product.id} value={product.id}>
+                                                {product.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <TextInput
+                                        type="number"
+                                        min="1"
+                                        value={item.quantity}
+                                        onChange={(e) => updateProductRow(index, 'quantity', e.target.value)}
+                                        placeholder="Cantidad"
+                                    />
+                                    <TextInput
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={item.unit_price}
+                                        onChange={(e) => updateProductRow(index, 'unit_price', e.target.value)}
+                                        placeholder="Precio unitario"
+                                    />
+                                    <button type="button" className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700" onClick={() => removeProductRow(index)}>
+                                        Quitar
+                                    </button>
+                                </div>
+                            ))}
+
+                            <InputError className="mt-1" message={errors.products} />
+                            <InputError className="mt-1" message={errors['products.0.product_id']} />
+                            <InputError className="mt-1" message={errors['products.0.quantity']} />
+                            <InputError className="mt-1" message={errors['products.0.unit_price']} />
                         </div>
 
                         <div className="space-y-3 rounded-md border border-gray-200 p-4">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Mail\TicketCreatedMail;
+use App\Models\Product;
 use App\Models\Ticket;
 use App\Support\UsesCompanyMailer;
 use Illuminate\Http\Request;
@@ -99,6 +100,10 @@ class TicketController extends Controller
     {
         return Inertia::render('Tickets/Create', [
             'statuses' => Ticket::statuses(),
+            'products' => Product::query()
+                ->where('company_id', auth()->user()->company_id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'sale_price']),
         ]);
     }
 
@@ -127,6 +132,19 @@ class TicketController extends Controller
                 'url' => $uploaded['url'],
                 'delete_url' => $uploaded['delete_url'] ?? null,
             ]);
+        }
+
+        if (! empty($validated['products'])) {
+            $ticket->products()->attach(
+                collect($validated['products'])
+                    ->mapWithKeys(fn (array $item): array => [
+                        $item['product_id'] => [
+                            'quantity' => $item['quantity'],
+                            'unit_price' => $item['unit_price'],
+                        ],
+                    ])
+                    ->all(),
+            );
         }
 
         $publicUrl = route('tickets.public.show', $ticket->public_token);

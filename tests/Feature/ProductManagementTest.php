@@ -25,6 +25,8 @@ class ProductManagementTest extends TestCase
 
         $response = $this->actingAs($employee)->post(route('products.store'), [
             'name' => 'Aceite 10W40',
+            'cost_price' => 10,
+            'sale_price' => 12,
             'generate_barcode' => true,
         ]);
 
@@ -56,6 +58,8 @@ class ProductManagementTest extends TestCase
 
         $response = $this->actingAs($employee)->from(route('products.index'))->post(route('products.store'), [
             'name' => 'Filtro de aire',
+            'cost_price' => 20,
+            'sale_price' => 30,
             'generate_barcode' => true,
         ]);
 
@@ -90,6 +94,8 @@ class ProductManagementTest extends TestCase
 
         $response = $this->actingAs($employee)->post(route('products.store'), [
             'name' => 'Bujía',
+            'cost_price' => 5,
+            'sale_price' => 8,
             'generate_barcode' => true,
         ]);
 
@@ -129,6 +135,8 @@ class ProductManagementTest extends TestCase
 
         $response = $this->actingAs($employee)->post(route('products.store'), [
             'name' => 'Pastillas de freno',
+            'cost_price' => 70,
+            'sale_price' => 95,
             'generate_barcode' => true,
             'invoice_image' => UploadedFile::fake()->image('factura.jpg'),
         ]);
@@ -139,5 +147,52 @@ class ProductManagementTest extends TestCase
         Storage::disk('public')->assertExists(
             \App\Models\Product::query()->firstOrFail()->invoice_image_path,
         );
+    }
+
+    public function test_employee_with_active_permission_can_edit_product(): void
+    {
+        $company = Company::factory()->create();
+
+        $admin = User::factory()->create([
+            'company_id' => $company->id,
+            'role' => User::ROLE_TENANT_ADMIN,
+        ]);
+
+        $employee = User::factory()->create([
+            'company_id' => $company->id,
+            'role' => User::ROLE_EMPLOYEE,
+        ]);
+
+        ProductCreationPermission::create([
+            'company_id' => $company->id,
+            'employee_id' => $employee->id,
+            'granted_by' => $admin->id,
+            'starts_at' => now()->subDay(),
+            'ends_at' => null,
+            'allow_without_invoice' => true,
+        ]);
+
+        $product = \App\Models\Product::create([
+            'company_id' => $company->id,
+            'created_by' => $admin->id,
+            'name' => 'Aceite mineral',
+            'cost_price' => 20,
+            'sale_price' => 30,
+        ]);
+
+        $response = $this->actingAs($employee)->patch(route('products.update', $product), [
+            'name' => 'Aceite sintético',
+            'cost_price' => 25,
+            'sale_price' => 40,
+        ]);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => 'Aceite sintético',
+            'cost_price' => 25,
+            'sale_price' => 40,
+        ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Models\ProductCreationPermission;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,7 +29,7 @@ class ProductController extends Controller
                     });
                 })
                 ->latest()
-                ->get(['id', 'name', 'sku', 'barcode', 'invoice_image_path', 'created_by', 'created_at']),
+                ->get(['id', 'name', 'sku', 'barcode', 'cost_price', 'sale_price', 'invoice_image_path', 'created_by', 'created_at']),
             'query' => $query,
             'canCreateWithoutInvoice' => $this->canCreateWithoutInvoice($request),
             'canCreateProducts' => $this->canCreateProducts($request),
@@ -51,6 +52,8 @@ class ProductController extends Controller
                 Rule::unique('products', 'barcode')->where(fn ($query) => $query->where('company_id', $request->user()->company_id)),
             ],
             'generate_barcode' => ['nullable', 'boolean'],
+            'cost_price' => ['required', 'numeric', 'min:0'],
+            'sale_price' => ['required', 'numeric', 'min:0'],
             'invoice_image' => [$canCreateWithoutInvoice ? 'nullable' : 'required', 'image', 'max:4096'],
         ]);
 
@@ -72,6 +75,51 @@ class ProductController extends Controller
             'name' => $validated['name'],
             'sku' => $validated['sku'] ?? null,
             'barcode' => $barcode,
+            'cost_price' => $validated['cost_price'],
+            'sale_price' => $validated['sale_price'],
+            'invoice_image_path' => $invoicePath,
+        ]);
+
+        return back();
+    }
+
+    public function update(Request $request, Product $product): RedirectResponse
+    {
+        abort_unless($product->company_id === $request->user()->company_id, 403);
+        abort_unless($this->canCreateProducts($request), 403, 'No tienes permiso activo para editar productos.');
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'sku' => ['nullable', 'string', 'max:255'],
+            'barcode' => [
+                'nullable',
+                'string',
+                'max:32',
+                Rule::unique('products', 'barcode')
+                    ->ignore($product->id)
+                    ->where(fn ($query) => $query->where('company_id', $request->user()->company_id)),
+            ],
+            'cost_price' => ['required', 'numeric', 'min:0'],
+            'sale_price' => ['required', 'numeric', 'min:0'],
+            'invoice_image' => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        $invoicePath = $product->invoice_image_path;
+
+        if ($request->hasFile('invoice_image')) {
+            if ($invoicePath) {
+                Storage::disk('public')->delete($invoicePath);
+            }
+
+            $invoicePath = $request->file('invoice_image')->store('product-invoices', 'public');
+        }
+
+        $product->update([
+            'name' => $validated['name'],
+            'sku' => $validated['sku'] ?? null,
+            'barcode' => $validated['barcode'] ?? null,
+            'cost_price' => $validated['cost_price'],
+            'sale_price' => $validated['sale_price'],
             'invoice_image_path' => $invoicePath,
         ]);
 

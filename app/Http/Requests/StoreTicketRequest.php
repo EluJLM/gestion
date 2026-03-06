@@ -30,6 +30,14 @@ class StoreTicketRequest extends FormRequest
             ],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'max:5120'],
+            'products' => ['nullable', 'array'],
+            'products.*.product_id' => [
+                'required',
+                'integer',
+                Rule::exists('products', 'id')->where('company_id', $this->user()->company_id),
+            ],
+            'products.*.quantity' => ['required', 'integer', 'min:1'],
+            'products.*.unit_price' => ['required', 'numeric', 'min:0'],
         ];
     }
 }

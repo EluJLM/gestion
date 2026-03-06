@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function ProductsIndex({ products, query, canCreateProducts, canCreateWithoutInvoice }) {
     const form = useForm({
@@ -7,6 +8,17 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
         sku: '',
         barcode: '',
         generate_barcode: true,
+        cost_price: '',
+        sale_price: '',
+        invoice_image: null,
+    });
+    const [editingProduct, setEditingProduct] = useState(null);
+    const editForm = useForm({
+        name: '',
+        sku: '',
+        barcode: '',
+        cost_price: '',
+        sale_price: '',
         invoice_image: null,
     });
 
@@ -14,7 +26,31 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
         e.preventDefault();
         form.post(route('products.store'), {
             forceFormData: true,
-            onSuccess: () => form.reset('name', 'sku', 'barcode', 'invoice_image'),
+            onSuccess: () => form.reset('name', 'sku', 'barcode', 'invoice_image', 'cost_price', 'sale_price'),
+        });
+    };
+
+    const startEditing = (product) => {
+        setEditingProduct(product.id);
+        editForm.setData({
+            name: product.name ?? '',
+            sku: product.sku ?? '',
+            barcode: product.barcode ?? '',
+            cost_price: product.cost_price ?? '',
+            sale_price: product.sale_price ?? '',
+            invoice_image: null,
+        });
+    };
+
+    const submitEdit = (e, productId) => {
+        e.preventDefault();
+        editForm.post(route('products.update', productId), {
+            forceFormData: true,
+            _method: 'patch',
+            onSuccess: () => {
+                setEditingProduct(null);
+                editForm.reset();
+            },
         });
     };
 
@@ -38,6 +74,8 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
                         <input className="rounded border" placeholder="Nombre" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
                         <input className="rounded border" placeholder="SKU interno" value={form.data.sku} onChange={(e) => form.setData('sku', e.target.value)} />
                         <input className="rounded border" placeholder="Código de barras (opcional)" value={form.data.barcode} onChange={(e) => form.setData('barcode', e.target.value)} />
+                        <input className="rounded border" type="number" min="0" step="0.01" placeholder="Valor costo" value={form.data.cost_price} onChange={(e) => form.setData('cost_price', e.target.value)} />
+                        <input className="rounded border" type="number" min="0" step="0.01" placeholder="Valor venta" value={form.data.sale_price} onChange={(e) => form.setData('sale_price', e.target.value)} />
                         <label className="flex items-center gap-2 text-sm">
                             <input type="checkbox" checked={form.data.generate_barcode} onChange={(e) => form.setData('generate_barcode', e.target.checked)} />
                             Generar código automáticamente
@@ -58,12 +96,36 @@ export default function ProductsIndex({ products, query, canCreateProducts, canC
                 <div className="space-y-2 rounded-lg border bg-white p-4">
                     {products.map((product) => (
                         <div key={product.id} className="rounded border p-3 text-sm">
-                            <p className="font-semibold">{product.name}</p>
-                            <p>SKU: {product.sku || 'N/A'}</p>
-                            <p>Código de barras: {product.barcode || 'Sin código'}</p>
-                            <p>Creado por: {product.creator?.name}</p>
-                            <p>Fecha: {new Date(product.created_at).toLocaleString()}</p>
-                            <p>{product.invoice_image_path ? 'Con factura adjunta' : 'Sin factura adjunta'}</p>
+                            {editingProduct === product.id ? (
+                                <form className="grid gap-2 md:grid-cols-2" onSubmit={(e) => submitEdit(e, product.id)}>
+                                    <input className="rounded border" placeholder="Nombre" value={editForm.data.name} onChange={(e) => editForm.setData('name', e.target.value)} />
+                                    <input className="rounded border" placeholder="SKU interno" value={editForm.data.sku} onChange={(e) => editForm.setData('sku', e.target.value)} />
+                                    <input className="rounded border" placeholder="Código de barras" value={editForm.data.barcode} onChange={(e) => editForm.setData('barcode', e.target.value)} />
+                                    <input className="rounded border" type="number" min="0" step="0.01" placeholder="Valor costo" value={editForm.data.cost_price} onChange={(e) => editForm.setData('cost_price', e.target.value)} />
+                                    <input className="rounded border" type="number" min="0" step="0.01" placeholder="Valor venta" value={editForm.data.sale_price} onChange={(e) => editForm.setData('sale_price', e.target.value)} />
+                                    <input className="rounded border p-1" type="file" accept="image/*" onChange={(e) => editForm.setData('invoice_image', e.target.files?.[0] ?? null)} />
+                                    <div className="md:col-span-2 flex gap-2">
+                                        <button className="rounded bg-indigo-600 px-3 py-2 text-xs text-white">Guardar cambios</button>
+                                        <button type="button" className="rounded border px-3 py-2 text-xs" onClick={() => setEditingProduct(null)}>Cancelar</button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <>
+                                    <p className="font-semibold">{product.name}</p>
+                                    <p>SKU: {product.sku || 'N/A'}</p>
+                                    <p>Código de barras: {product.barcode || 'Sin código'}</p>
+                                    <p>Valor costo: ${Number(product.cost_price ?? 0).toFixed(2)}</p>
+                                    <p>Valor venta: ${Number(product.sale_price ?? 0).toFixed(2)}</p>
+                                    <p>Creado por: {product.creator?.name}</p>
+                                    <p>Fecha: {new Date(product.created_at).toLocaleString()}</p>
+                                    <p>{product.invoice_image_path ? 'Con factura adjunta' : 'Sin factura adjunta'}</p>
+                                    {canCreateProducts && (
+                                        <button type="button" className="mt-2 rounded border px-3 py-1 text-xs" onClick={() => startEditing(product)}>
+                                            Editar producto
+                                        </button>
+                                    )}
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>
