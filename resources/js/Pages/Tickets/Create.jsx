@@ -12,7 +12,7 @@ const statusLabels = {
     pending: 'Pendiente',
     in_progress: 'En progreso',
     resolved: 'Resuelto',
-    closed: 'Cerrado',
+    closed: 'Venta cerrada',
 };
 
 const todayString = () => new Date().toISOString().slice(0, 10);
@@ -159,11 +159,11 @@ export default function TicketsCreate({ statuses, products }) {
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Crear servicio
+                    Crear venta
                 </h2>
             }
         >
-            <Head title="Crear servicio" />
+            <Head title="Crear venta" />
 
             <div className="py-10">
                 <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8">
@@ -180,7 +180,7 @@ export default function TicketsCreate({ statuses, products }) {
                             href={route('tickets.index')}
                             className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 transition hover:bg-gray-50"
                         >
-                            Ver servicios registrados
+                            Ver ventas registradas
                         </Link>
                     </div>
 
@@ -421,7 +421,7 @@ export default function TicketsCreate({ statuses, products }) {
                             <InputError className="mt-1" message={errors.client_id} />
                         </div>
 
-                        <PrimaryButton disabled={processing}>Guardar servicio</PrimaryButton>
+                        <PrimaryButton disabled={processing}>Guardar venta</PrimaryButton>
                     </form>
                 </div>
             </div>

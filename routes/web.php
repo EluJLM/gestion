@@ -98,6 +98,7 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
     Route::middleware('role:'.User::ROLE_TENANT_ADMIN)->group(function () {
         Route::get('/configuracion', [ConfiguracionController::class, 'edit'])->name('configuracion.edit');
         Route::post('/configuracion/empresa', [ConfiguracionController::class, 'upsertCompany'])->name('configuracion.company.upsert');
+        Route::post('/configuracion/empresa/mail-fallback', [ConfiguracionController::class, 'updateMailFallback'])->name('configuracion.company.mail-fallback.update');
         Route::post('/configuracion/correo', [ConfiguracionController::class, 'upsertMail'])->name('configuracion.mail.upsert');
         Route::post('/configuracion/correo/test', [ConfiguracionController::class, 'testMail'])->name('configuracion.mail.test');
 

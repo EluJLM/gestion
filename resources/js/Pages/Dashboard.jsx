@@ -57,7 +57,7 @@ export default function Dashboard({ pendingTickets, monthlyMetrics, closedServic
                                 ))}
                             </div>
                         </div>
-                        <p className="mt-2 text-xs text-gray-500">Eje X: días del mes · Eje Y: cantidad de servicios cerrados.</p>
+                        <p className="mt-2 text-xs text-gray-500">Eje X: días del mes · Eje Y: cantidad de ventas cerradas.</p>
                     </div>
 
                     <div className="overflow-hidden rounded-lg bg-white p-4 shadow sm:p-6">
@@ -67,14 +67,14 @@ export default function Dashboard({ pendingTickets, monthlyMetrics, closedServic
                                 href={route('tickets.index')}
                                 className="inline-flex w-full items-center justify-center rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-red-700 sm:w-auto"
                             >
-                                Ver servicios
+                                Ver ventas
                             </Link>
                         </div>
 
                         <div className="space-y-3">
                             {pendingTickets.length === 0 && (
                                 <p className="rounded-md border border-dashed border-gray-300 p-4 text-sm text-gray-500">
-                                    No hay servicios pendientes para este mes.
+                                    No hay ventas pendientes para este mes.
                                 </p>
                             )}
 

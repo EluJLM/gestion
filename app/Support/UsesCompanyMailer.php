@@ -35,7 +35,12 @@ trait UsesCompanyMailer
             return;
         }
 
-        Mail::to($to)->send($mailable);
+        Mail::to($to)->send(
+            $mailable->from(
+                (string) config('mail.from.address'),
+                (string) ($company?->name ?: config('mail.from.name')),
+            ),
+        );
     }
 
     private function applyCompanyMailer(MailSetting $mailSetting): void

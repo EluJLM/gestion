@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle público del servicio</title>
+    <title>Detalle público de la venta</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f3f4f6; margin: 0; padding: 24px; }
         .card { max-width: 900px; margin: 0 auto; background: white; border-radius: 8px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
@@ -68,7 +68,7 @@
                 <div class="gallery">
                     @foreach ($ticket->images as $image)
                         <a href="{{ $image->url }}" target="_blank" rel="noopener noreferrer" class="image-card">
-                            <img src="{{ $image->url }}" alt="Imagen {{ $loop->iteration }} del servicio" loading="lazy">
+                            <img src="{{ $image->url }}" alt="Imagen {{ $loop->iteration }} de la venta" loading="lazy">
                             <span>Ver imagen {{ $loop->iteration }}</span>
                         </a>
                     @endforeach

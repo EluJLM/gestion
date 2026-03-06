@@ -43,7 +43,7 @@ export default function Configuracion({
         email: company?.email ?? '',
         tax_regime: company?.tax_regime ?? taxRegimes[0] ?? '',
         logo_path: company?.logo_path ?? '',
-        allow_system_mail_fallback: company?.allow_system_mail_fallback ?? true,
+        allow_system_mail_fallback: company?.allow_system_mail_fallback ?? false,
     });
 
     const mailForm = useForm({
@@ -82,6 +82,18 @@ export default function Configuracion({
     const submitCompany = (e) => {
         e.preventDefault();
         companyForm.post(route('configuracion.company.upsert'));
+    };
+
+    const updateSystemMailFallback = (checked) => {
+        companyForm.setData('allow_system_mail_fallback', checked);
+        companyForm.transform((formData) => ({
+            allow_system_mail_fallback: checked,
+        })).post(route('configuracion.company.mail-fallback.update'), {
+            preserveScroll: true,
+            onFinish: () => {
+                companyForm.transform((formData) => formData);
+            },
+        });
     };
 
     const submitMail = (e) => {
@@ -319,7 +331,7 @@ export default function Configuracion({
                                         className="mt-0.5 rounded border-gray-300 text-indigo-600"
                                         checked={companyForm.data.allow_system_mail_fallback}
                                         onChange={(e) =>
-                                            companyForm.setData('allow_system_mail_fallback', e.target.checked)
+                                            updateSystemMailFallback(e.target.checked)
                                         }
                                     />
                                     <span>
