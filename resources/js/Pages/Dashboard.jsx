@@ -34,13 +34,13 @@ export default function Dashboard({ pendingTickets, monthlyMetrics, closedServic
                             <p className="mt-2 text-3xl font-bold text-red-700">{monthlyMetrics.pending}</p>
                         </div>
                         <div className="overflow-hidden rounded-lg border border-emerald-100 bg-emerald-50 p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Cerrados</p>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Ventas</p>
                             <p className="mt-2 text-3xl font-bold text-emerald-800">{monthlyMetrics.closed}</p>
                         </div>
                     </div>
 
                     <div className="overflow-hidden rounded-lg bg-white p-4 shadow sm:p-6">
-                        <h3 className="text-base font-semibold text-gray-900 sm:text-lg">Servicios cerrados por día (mes actual)</h3>
+                        <h3 className="text-base font-semibold text-gray-900 sm:text-lg">Servicios en venta por día (mes actual)</h3>
                         <div className="-mx-1 mt-4 overflow-x-auto px-1">
                             <div className="flex min-w-[540px] items-end gap-1 rounded-md border border-gray-100 bg-gray-50 p-3 sm:min-w-[780px] sm:gap-2 sm:p-4">
                                 {closedServicesChart.map((point) => (
@@ -50,14 +50,14 @@ export default function Dashboard({ pendingTickets, monthlyMetrics, closedServic
                                             style={{
                                                 height: `${Math.max((point.closed / maxClosed) * 160, point.closed > 0 ? 8 : 2)}px`,
                                             }}
-                                            title={`Día ${point.day}: ${point.closed} cerrados`}
+                                            title={`Día ${point.day}: ${point.closed} en venta`}
                                         />
                                         <span className="text-[9px] text-gray-500 sm:text-[10px]">{point.day}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        <p className="mt-2 text-xs text-gray-500">Eje X: días del mes · Eje Y: cantidad de servicios cerrados.</p>
+                        <p className="mt-2 text-xs text-gray-500">Eje X: días del mes · Eje Y: cantidad de servicios en venta.</p>
                     </div>
 
                     <div className="overflow-hidden rounded-lg bg-white p-4 shadow sm:p-6">

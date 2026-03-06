@@ -3,7 +3,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
 const smtpProviders = {
@@ -43,7 +43,7 @@ export default function Configuracion({
         email: company?.email ?? '',
         tax_regime: company?.tax_regime ?? taxRegimes[0] ?? '',
         logo_path: company?.logo_path ?? '',
-        allow_system_mail_fallback: company?.allow_system_mail_fallback ?? true,
+        allow_system_mail_fallback: company?.allow_system_mail_fallback ?? false,
     });
 
     const mailForm = useForm({
@@ -96,6 +96,21 @@ export default function Configuracion({
         testMailForm.post(route('configuracion.mail.test'), {
             preserveScroll: true,
         });
+    };
+
+    const toggleSystemMailFallback = (enabled) => {
+        companyForm.setData('allow_system_mail_fallback', enabled);
+
+        router.post(
+            route('configuracion.company.fallback.update'),
+            {
+                allow_system_mail_fallback: enabled,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
     };
 
     return (
@@ -318,9 +333,7 @@ export default function Configuracion({
                                         type="checkbox"
                                         className="mt-0.5 rounded border-gray-300 text-indigo-600"
                                         checked={companyForm.data.allow_system_mail_fallback}
-                                        onChange={(e) =>
-                                            companyForm.setData('allow_system_mail_fallback', e.target.checked)
-                                        }
+                                        onChange={(e) => toggleSystemMailFallback(e.target.checked)}
                                     />
                                     <span>
                                         Usar correo del sistema cuando no tenga correo registrado ni SMTP propio.

@@ -54,7 +54,7 @@ class RegisteredUserController extends Controller
                 'phone' => '0000000000',
                 'whatsapp' => '0000000000',
                 'email' => $request->email,
-                'allow_system_mail_fallback' => true,
+                'allow_system_mail_fallback' => false,
                 'tax_regime' => 'No responsable de IVA',
                 'subscription_status' => Company::STATUS_TRIAL,
                 'trial_ends_at' => now()->addMonth(),

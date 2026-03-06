@@ -6,7 +6,7 @@ const statusLabels = {
     pending: 'Pendiente',
     in_progress: 'En proceso',
     resolved: 'Resuelto',
-    closed: 'Cerrado',
+    closed: 'Venta',
 };
 
 const statusClasses = {

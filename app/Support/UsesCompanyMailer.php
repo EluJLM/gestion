@@ -35,6 +35,14 @@ trait UsesCompanyMailer
             return;
         }
 
+        if ($company) {
+            $fromName = $company->name ?: $company->business_name;
+
+            if ($fromName) {
+                Config::set('mail.from.name', $fromName);
+            }
+        }
+
         Mail::to($to)->send($mailable);
     }
 

@@ -11,7 +11,7 @@ return new class extends Migration {
         DB::statement('ALTER TABLE companies MODIFY email VARCHAR(255) NULL');
 
         Schema::table('companies', function (Blueprint $table) {
-            $table->boolean('allow_system_mail_fallback')->default(true)->after('email');
+            $table->boolean('allow_system_mail_fallback')->default(false)->after('email');
         });
     }
 

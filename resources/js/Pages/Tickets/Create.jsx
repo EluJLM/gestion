@@ -12,7 +12,7 @@ const statusLabels = {
     pending: 'Pendiente',
     in_progress: 'En progreso',
     resolved: 'Resuelto',
-    closed: 'Cerrado',
+    closed: 'Venta',
 };
 
 const todayString = () => new Date().toISOString().slice(0, 10);

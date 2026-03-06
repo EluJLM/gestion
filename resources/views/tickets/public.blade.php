@@ -42,7 +42,7 @@
         <div class="value">{{ optional($ticket->created_at)->format('Y-m-d H:i') }}</div>
 
         <div class="label">Fecha de cierre</div>
-        <div class="value">{{ optional($ticket->closed_at)->format('Y-m-d H:i') ?? 'No cerrado' }}</div>
+        <div class="value">{{ optional($ticket->closed_at)->format('Y-m-d H:i') ?? 'No en venta' }}</div>
 
         <hr>
 
