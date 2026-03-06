@@ -90,15 +90,15 @@ class ConfiguracionController extends Controller
 
     public function updateMailFallback(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'allow_system_mail_fallback' => ['required', 'boolean'],
+        $request->validate([
+            'allow_system_mail_fallback' => ['sometimes', 'boolean'],
         ]);
 
         $company = Company::query()->find($request->user()->company_id);
 
         if ($company) {
             $company->update([
-                'allow_system_mail_fallback' => $validated['allow_system_mail_fallback'],
+                'allow_system_mail_fallback' => $request->boolean('allow_system_mail_fallback'),
             ]);
         }
 

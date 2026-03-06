@@ -3,7 +3,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
 const smtpProviders = {
@@ -86,13 +86,11 @@ export default function Configuracion({
 
     const updateSystemMailFallback = (checked) => {
         companyForm.setData('allow_system_mail_fallback', checked);
-        companyForm.transform((formData) => ({
+
+        router.post(route('configuracion.company.mail-fallback.update'), {
             allow_system_mail_fallback: checked,
-        })).post(route('configuracion.company.mail-fallback.update'), {
+        }, {
             preserveScroll: true,
-            onFinish: () => {
-                companyForm.transform((formData) => formData);
-            },
         });
     };
 
