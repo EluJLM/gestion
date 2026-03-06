@@ -153,7 +153,7 @@ class TicketController extends Controller
         $this->sendCompanyAwareMail($ticket->client->email, new TicketCreatedMail($ticket));
 
         return to_route('tickets.create')->with('ticketCreated', [
-            'message' => 'Servicio creado correctamente.',
+            'message' => 'Venta creada correctamente.',
             'whatsapp_message' => $whatsappMessage,
             'whatsapp_url' => $this->buildWhatsappUrl($ticket->client->phone, $whatsappMessage),
         ]);
@@ -202,9 +202,9 @@ class TicketController extends Controller
     private function buildWhatsappMessage(Ticket $ticket, string $publicUrl): string
     {
         return implode("\n", [
-            'Hola '.$ticket->client->name.', tu servicio fue creado correctamente.',
+            'Hola '.$ticket->client->name.', tu venta fue creada correctamente.',
             '',
-            '• Servicio: '.$ticket->title,
+            '• Venta: '.$ticket->title,
             '• Dirección: '.$ticket->client->address,
             '• Fecha del servicio: '.$ticket->service_date?->format('d/m/Y'),
             '',

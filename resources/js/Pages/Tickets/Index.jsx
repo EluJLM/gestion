@@ -6,7 +6,7 @@ const statusLabels = {
     pending: 'Pendiente',
     in_progress: 'En proceso',
     resolved: 'Resuelto',
-    closed: 'Cerrado',
+    closed: 'Venta cerrada',
 };
 
 const statusClasses = {
@@ -98,7 +98,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                             href={route('tickets.create')}
                             className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-indigo-500"
                         >
-                            Crear servicio
+                            Crear venta
                         </Link>
                     </div>
 
@@ -120,7 +120,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                             <p className="mt-2 text-3xl font-bold text-emerald-700">{stats.resolved}</p>
                         </div>
                         <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4">
-                            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">Cerrados</p>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">Ventas cerradas</p>
                             <p className="mt-2 text-3xl font-bold text-emerald-900">{stats.closed}</p>
                         </div>
                     </div>
@@ -206,13 +206,13 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
 
                     <div className="rounded-lg bg-white p-6 shadow">
                         <h3 className="mb-4 text-lg font-semibold text-gray-900">
-                            Listado de servicios
+                            Listado de ventas
                         </h3>
 
                         <div className="space-y-3 md:hidden">
                             {tickets.length === 0 && (
                                 <p className="rounded-md border border-dashed border-gray-300 px-3 py-4 text-center text-sm text-gray-500">
-                                    No hay servicios registrados para los filtros seleccionados.
+                                    No hay ventas registradas para los filtros seleccionados.
                                 </p>
                             )}
 
@@ -290,7 +290,7 @@ export default function TicketsIndex({ tickets, statuses, filters, stats }) {
                                                 colSpan={8}
                                                 className="px-2 py-4 text-center text-gray-500"
                                             >
-                                                No hay servicios registrados para los filtros seleccionados.
+                                                No hay ventas registradas para los filtros seleccionados.
                                             </td>
                                         </tr>
                                     )}

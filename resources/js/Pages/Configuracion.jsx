@@ -3,7 +3,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
 const smtpProviders = {
@@ -43,7 +43,7 @@ export default function Configuracion({
         email: company?.email ?? '',
         tax_regime: company?.tax_regime ?? taxRegimes[0] ?? '',
         logo_path: company?.logo_path ?? '',
-        allow_system_mail_fallback: company?.allow_system_mail_fallback ?? true,
+        allow_system_mail_fallback: company?.allow_system_mail_fallback ?? false,
     });
 
     const mailForm = useForm({
@@ -82,6 +82,16 @@ export default function Configuracion({
     const submitCompany = (e) => {
         e.preventDefault();
         companyForm.post(route('configuracion.company.upsert'));
+    };
+
+    const updateSystemMailFallback = (checked) => {
+        companyForm.setData('allow_system_mail_fallback', checked);
+
+        router.post(route('configuracion.company.mail-fallback.update'), {
+            allow_system_mail_fallback: checked,
+        }, {
+            preserveScroll: true,
+        });
     };
 
     const submitMail = (e) => {
@@ -319,7 +329,7 @@ export default function Configuracion({
                                         className="mt-0.5 rounded border-gray-300 text-indigo-600"
                                         checked={companyForm.data.allow_system_mail_fallback}
                                         onChange={(e) =>
-                                            companyForm.setData('allow_system_mail_fallback', e.target.checked)
+                                            updateSystemMailFallback(e.target.checked)
                                         }
                                     />
                                     <span>
